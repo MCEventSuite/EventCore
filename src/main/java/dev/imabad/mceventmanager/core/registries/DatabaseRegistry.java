@@ -1,22 +1,25 @@
 package dev.imabad.mceventmanager.core.registries;
 
 import dev.imabad.mceventmanager.core.EventCore;
-import dev.imabad.mceventmanager.core.api.DatabaseProvider;
+import dev.imabad.mceventmanager.core.api.database.DatabaseProvider;
 import dev.imabad.mceventmanager.core.api.IRegistry;
+import dev.imabad.mceventmanager.core.api.database.DatabaseType;
+import dev.imabad.mceventmanager.core.api.database.IDatabase;
+import dev.imabad.mceventmanager.core.api.database.IPersistentDatabase;
 import dev.imabad.mceventmanager.core.api.exceptions.NotRegisteredException;
 import java.util.HashMap;
 
 public class DatabaseRegistry implements IRegistry {
 
     private boolean loaded = true;
-    private HashMap<Class<?extends DatabaseProvider>, DatabaseProvider> databases;
+    private HashMap<DatabaseType, DatabaseProvider> databases;
 
     public DatabaseRegistry(){
         databases = new HashMap<>();
     }
 
-    public <T extends DatabaseProvider> void register(Class<T> databaseProviderClazz, DatabaseProvider databaseProvider){
-        databases.put(databaseProviderClazz, databaseProvider);
+    public <T extends DatabaseProvider> void register(DatabaseProvider databaseProvider){
+        databases.put(databaseProvider.getType(), databaseProvider);
         EventCore.getInstance().getConfigRegistry().registerConfig(databaseProvider);
     }
 
@@ -28,11 +31,8 @@ public class DatabaseRegistry implements IRegistry {
         databases.values().stream().filter(DatabaseProvider::isConnected).forEach(DatabaseProvider::disconnect);
     }
 
-    public <T extends DatabaseProvider> T getDatabase(Class<T> clazz){
-        if(!databases.containsKey(clazz)){
-            throw new NotRegisteredException(this, clazz.getName());
-        }
-        return clazz.cast(databases.get(clazz));
+    public IPersistentDatabase getPersistentDatabase(){
+        return (IPersistentDatabase) databases.get(DatabaseType.PERSISTENT);
     }
 
     @Override

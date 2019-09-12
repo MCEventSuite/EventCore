@@ -20,6 +20,8 @@ public abstract class Module {
 
     public abstract List<Module> getDependencies();
 
+    public boolean hasModuleConfig() { return true; }
+
     public abstract void loadConfig(@Nullable ModuleConfig moduleConfig);
 
     public abstract ModuleConfig getConfig();

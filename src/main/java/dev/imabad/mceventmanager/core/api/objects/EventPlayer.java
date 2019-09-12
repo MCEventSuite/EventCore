@@ -1,6 +1,6 @@
 package dev.imabad.mceventmanager.core.api.objects;
 
-import dev.imabad.mceventmanager.core.database.player.RankDatabase;
+import dev.imabad.mceventmanager.core.util.PropertyMap;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Field;
 import dev.morphia.annotations.Id;
@@ -15,19 +15,35 @@ import java.util.UUID;
 @Indexes({@Index(value="uuid", fields = @Field("uuid")), @Index(value="username", fields= @Field("lastUsername"))})
 public class EventPlayer {
 
+    private static PropertyMap<String, Object> defaultProperties = new PropertyMap<>();
+
+    public static void addDefault(String name, Object defaultValue){
+        defaultProperties.put(name, defaultValue);
+    }
+
     @Id
     private UUID uuid;
     private String lastUsername;
     @Reference(lazy = true)
     private EventRank rank;
     private List<String> permissions;
+    private PropertyMap<String, Object> properties;
 
     EventPlayer(){}
+
+    protected EventPlayer(UUID uuid, String lastUsername, EventRank rank, List<String> permissions, PropertyMap<String, Object> properties) {
+        this.uuid = uuid;
+        this.lastUsername = lastUsername;
+        this.rank = rank;
+        this.permissions = permissions;
+        this.properties = properties;
+    }
 
     public EventPlayer(UUID uuid, String username){
         this.uuid = uuid;
         this.lastUsername = username;
         this.rank = RankDatabase.getInstance().getLowestRank();
+        this.properties = defaultProperties;
     }
 
     public UUID getUuid() {
@@ -70,5 +86,50 @@ public class EventPlayer {
 
     public boolean hasPermission(String permission){
         return this.permissions == null ? rank.getPermissions().contains(permission) : (this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission)));
+    }
+
+    public int getIntProperty(String name){
+        if(properties.containsKey(name)){
+            return properties.getIntProperty(name);
+        } else if (defaultProperties.containsKey(name)){
+            return defaultProperties.getIntProperty(name);
+        }
+        return -1;
+    }
+
+    public String getStringProperty(String name){
+        if(properties.containsKey(name)){
+            return properties.getStringProperty(name);
+        } else if (defaultProperties.containsKey(name)){
+            return defaultProperties.getStringProperty(name);
+        }
+        return null;
+    }
+
+    public double getDoubleProperty(String name){
+        if(properties.containsKey(name)){
+            return properties.getDoubleProperty(name);
+        } else if (defaultProperties.containsKey(name)){
+            return defaultProperties.getDoubleProperty(name);
+        }
+        return -1;
+    }
+
+    public float getFloatProperty(String name){
+        if(properties.containsKey(name)){
+            return properties.getFloatProperty(name);
+        } else if (defaultProperties.containsKey(name)){
+            return defaultProperties.getFloatProperty(name);
+        }
+        return -1;
+    }
+
+    public Object getProperty(String name){
+        if(properties.containsKey(name)){
+            return properties.get(name);
+        } else if(defaultProperties.containsKey(name)){
+            return defaultProperties.get(name);
+        }
+        return null;
     }
 }

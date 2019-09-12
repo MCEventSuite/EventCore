@@ -6,7 +6,7 @@ import dev.imabad.mceventmanager.core.api.modules.Module;
 import dev.imabad.mceventmanager.core.api.exceptions.CircularDependencyException;
 import dev.imabad.mceventmanager.core.api.exceptions.NotRegisteredException;
 import dev.imabad.mceventmanager.core.api.modules.ModuleConfig;
-import dev.imabad.mceventmanager.core.database.MongoDatabase;
+import dev.imabad.mceventmanager.core.modules.mongo.MongoDatabase;
 import java.util.HashMap;
 
 public class ModuleRegistry implements IRegistry {
@@ -40,8 +40,10 @@ public class ModuleRegistry implements IRegistry {
                 loadModuleAndDependencies(module);
             }
         }
-        ModuleConfig moduleConfig = EventCore.getInstance().getDatabaseRegistry().getDatabase(MongoDatabase.class).getDatastore().createQuery(ModuleConfig.class).field("moduleName").equal(module.getName()).first();
-        module.loadConfig(moduleConfig);
+        if(module.hasModuleConfig()){
+            ModuleConfig moduleConfig = EventCore.getInstance().getDatabaseRegistry().getDatabase(MongoDatabase.class).getDatastore().createQuery(ModuleConfig.class).field("moduleName").equal(module.getName()).first();
+            module.loadConfig(moduleConfig);
+        }
         module.onEnable();
     }
 
