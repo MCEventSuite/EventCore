@@ -1,13 +1,17 @@
 package dev.imabad.mceventsuite.core.modules.mongo;
 
-import dev.imabad.mceventsuite.core.EventCore;
+import dev.imabad.mceventsuite.core.api.BaseConfig;
+import dev.imabad.mceventsuite.core.api.IConfigProvider;
 import dev.imabad.mceventsuite.core.api.modules.Module;
-import dev.imabad.mceventsuite.core.api.modules.ModuleConfig;
+import dev.imabad.mceventsuite.core.config.database.MongoConfig;
 
 import java.util.Collections;
 import java.util.List;
 
-public class MongoModule extends Module {
+public class MongoModule extends Module implements IConfigProvider<MongoConfig> {
+
+    private MongoConfig mongoConfig;
+    private MongoDatabase mongoDatabase;
 
     @Override
     public String getName() {
@@ -16,14 +20,14 @@ public class MongoModule extends Module {
 
     @Override
     public void onEnable() {
-        EventCore.getInstance().getDatabaseRegistry().register(new MongoDatabase());
+        this.mongoDatabase = new MongoDatabase(this.mongoConfig);
+        this.mongoDatabase.connect();
     }
 
     @Override
     public void onDisable() {
-        if(EventCore.getInstance().getDatabaseRegistry().getPersistentDatabase() instanceof MongoDatabase && EventCore
-                .getInstance().getDatabaseRegistry().getPersistentDatabase().isConnected())
-            EventCore.getInstance().getDatabaseRegistry().getPersistentDatabase().disconnect();
+        if(this.mongoDatabase.isConnected())
+            this.mongoDatabase.disconnect();
     }
 
     @Override
@@ -32,17 +36,31 @@ public class MongoModule extends Module {
     }
 
     @Override
-    public void loadConfig(ModuleConfig moduleConfig) {
-
+    public Class<MongoConfig> getConfigType() {
+        return MongoConfig.class;
     }
 
     @Override
-    public ModuleConfig getConfig() {
-        return null;
+    public MongoConfig getConfig() {
+        return mongoConfig;
+    }
+
+
+    @Override
+    public String getFileName() {
+        return "mongo.json";
     }
 
     @Override
-    public boolean hasModuleConfig() {
-        return false;
+    public void loadConfig(MongoConfig config) {
+        this.mongoConfig = config;
+    }
+
+    @Override
+    public void saveConfig() {
+
+    }
+    public MongoDatabase getMongoDatabase() {
+        return mongoDatabase;
     }
 }

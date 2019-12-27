@@ -1,6 +1,7 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
 import dev.imabad.mceventsuite.core.EventCore;
+import dev.imabad.mceventsuite.core.modules.mongo.MongoModule;
 import dev.imabad.mceventsuite.core.util.PropertyMap;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Field;
@@ -43,7 +44,7 @@ public class EventPlayer {
     public EventPlayer(UUID uuid, String username){
         this.uuid = uuid;
         this.lastUsername = username;
-        this.rank = EventCore.getInstance().getDatabaseRegistry().getPersistentDatabase().getLowestRank();
+        this.rank = EventCore.getInstance().getModuleRegistry().getModule(MongoModule.class).getMongoDatabase().getLowestRank();
         this.properties = defaultProperties;
     }
 

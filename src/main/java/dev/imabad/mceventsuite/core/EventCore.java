@@ -1,10 +1,11 @@
 package dev.imabad.mceventsuite.core;
 
-import dev.imabad.mceventsuite.core.config.EventConfig;
-import dev.imabad.mceventsuite.core.managers.PlayerManager;
+import dev.imabad.mceventsuite.core.config.EventSettings;
+import dev.imabad.mceventsuite.core.managers.EventPlayerManager;
+import dev.imabad.mceventsuite.core.modules.mongo.MongoLoadedEvent;
 import dev.imabad.mceventsuite.core.modules.mongo.MongoModule;
-import dev.imabad.mceventsuite.core.registries.ConfigRegistry;
-import dev.imabad.mceventsuite.core.registries.DatabaseRegistry;
+import dev.imabad.mceventsuite.core.registries.EventRegistry;
+import dev.imabad.mceventsuite.core.util.ConfigLoader;
 import dev.imabad.mceventsuite.core.registries.ModuleRegistry;
 
 import java.io.File;
@@ -17,42 +18,45 @@ public class EventCore {
         return instance;
     }
 
-    private ConfigRegistry configRegistry;
+    private ConfigLoader configLoader;
     private ModuleRegistry moduleRegistry;
-    private DatabaseRegistry databaseRegistry;
+    private EventRegistry eventRegistry;
 
-    private PlayerManager playerManager;
+    private EventPlayerManager eventPlayerManager;
 
-    private EventConfig eventConfig;
+    private EventSettings eventSettings;
 
     public EventCore(File configFolder){
         instance = this;
-        configRegistry = new ConfigRegistry(configFolder);
+        configLoader = new ConfigLoader(configFolder);
         moduleRegistry = new ModuleRegistry();
-        databaseRegistry = new DatabaseRegistry();
+        eventRegistry = new EventRegistry();
+        eventRegistry.registerListener(MongoLoadedEvent.class, (event) -> {
+            eventSettings = new EventSettings();
+            eventPlayerManager = new EventPlayerManager();
+        });
         moduleRegistry.addModule(new MongoModule());
         moduleRegistry.enableModules();
-        databaseRegistry.connectAll();
-        playerManager = new PlayerManager();
     }
 
-    public ConfigRegistry getConfigRegistry() {
-        return configRegistry;
-    }
-
-    public DatabaseRegistry getDatabaseRegistry() {
-        return databaseRegistry;
+    public ConfigLoader getConfigLoader() {
+        return configLoader;
     }
 
     public ModuleRegistry getModuleRegistry() {
         return moduleRegistry;
     }
 
-    public EventConfig getEventConfig() {
-        return eventConfig;
+    public EventSettings getEventSettings() {
+        return eventSettings;
     }
 
-    public PlayerManager getPlayerManager() {
-        return playerManager;
+    public EventPlayerManager getEventPlayerManager() {
+        return eventPlayerManager;
     }
+
+    public EventRegistry getEventRegistry() {
+        return eventRegistry;
+    }
+
 }

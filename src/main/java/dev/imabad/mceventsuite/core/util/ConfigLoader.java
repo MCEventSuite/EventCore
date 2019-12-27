@@ -1,4 +1,4 @@
-package dev.imabad.mceventsuite.core.registries;
+package dev.imabad.mceventsuite.core.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,13 +12,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class ConfigRegistry implements IRegistry {
+public class ConfigLoader {
 
-    private HashMap<IConfigProvider, Object> configs;
+    private HashMap<String, Object> configs;
     private Gson gson;
     private File configFolder;
 
-    public ConfigRegistry(File configFolder){
+    public ConfigLoader(File configFolder){
         if(!configFolder.exists()){
             configFolder.mkdir();
         }
@@ -27,12 +27,12 @@ public class ConfigRegistry implements IRegistry {
         this.configFolder = configFolder;
     }
 
-    public <T extends BaseConfig> void registerConfig(IConfigProvider<T> configProvider){
-        File configFile = new File(configFolder, configProvider.getFileName());
+    private <T extends BaseConfig> T loadConfig(IConfigProvider<T> iConfigProvider){
+        File configFile = new File(configFolder, iConfigProvider.getFileName());
         T baseConfig = null;
         if(!configFile.exists()){
             try {
-                baseConfig = configProvider.getConfigType().cast(configProvider.getConfigType().newInstance());
+                baseConfig = iConfigProvider.getConfigType().cast(iConfigProvider.getConfigType().newInstance());
                 String string = gson.toJson(baseConfig);
                 try(FileWriter fileWriter = new FileWriter(configFile)){
                     fileWriter.append(string);
@@ -41,44 +41,32 @@ public class ConfigRegistry implements IRegistry {
                 }
             } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
-        }
+            }
         } else {
             try {
-                baseConfig = gson.fromJson(new FileReader(configFile), configProvider.getConfigType());
+                baseConfig = gson.fromJson(new FileReader(configFile), iConfigProvider.getConfigType());
             }catch(Exception e){
                 e.printStackTrace();
             }
         }
-        configProvider.loadConfig(baseConfig);
-        configs.put(configProvider, baseConfig);
+        iConfigProvider.loadConfig(baseConfig);
+        configs.put(iConfigProvider.getFileName(), baseConfig);
+        return baseConfig;
     }
 
-    public <T extends BaseConfig> T getConfig(IConfigProvider<T> iConfigProvider) {
+    public <T extends BaseConfig> T getOrLoadConfig(IConfigProvider<T> iConfigProvider) {
         if(!configs.containsKey(iConfigProvider)){
-            throw new NotRegisteredException(this, iConfigProvider.getConfig().getName());
+            return this.loadConfig(iConfigProvider);
         }
         return iConfigProvider.getConfigType().cast(configs.get(iConfigProvider));
     }
 
     public <T extends BaseConfig> void saveConfig(IConfigProvider<T> iConfigProvider){
-        if(!configs.containsKey(iConfigProvider)){
-            throw new NotRegisteredException(this, iConfigProvider.getConfig().getName());
-        }
         File configFile = new File(configFolder, iConfigProvider.getFileName());
         try {
             gson.toJson(iConfigProvider.getConfig(), iConfigProvider.getConfigType(), new FileWriter(configFile));
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public String getName() {
-        return "config";
-    }
-
-    @Override
-    public boolean isLoaded() {
-        return true;
     }
 }

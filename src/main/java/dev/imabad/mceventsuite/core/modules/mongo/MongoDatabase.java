@@ -4,14 +4,13 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+import com.sun.jdi.event.EventSet;
 import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.database.DatabaseProvider;
 import dev.imabad.mceventsuite.core.api.database.DatabaseType;
-import dev.imabad.mceventsuite.core.api.database.IPersistentDatabase;
-import dev.imabad.mceventsuite.core.api.modules.Module;
-import dev.imabad.mceventsuite.core.api.modules.ModuleConfig;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import dev.imabad.mceventsuite.core.api.objects.EventRank;
+import dev.imabad.mceventsuite.core.api.objects.EventSetting;
 import dev.imabad.mceventsuite.core.config.database.MongoConfig;
 import dev.morphia.Datastore;
 import dev.morphia.Morphia;
@@ -20,7 +19,7 @@ import dev.morphia.query.Sort;
 import java.util.List;
 import java.util.UUID;
 
-public class MongoDatabase extends DatabaseProvider<MongoConfig> implements IPersistentDatabase {
+public class MongoDatabase extends DatabaseProvider {
 
     private boolean connected = false;
     private MongoConfig mongoConfig;
@@ -28,34 +27,13 @@ public class MongoDatabase extends DatabaseProvider<MongoConfig> implements IPer
     private MongoClient mongoClient;
     private Datastore datastore;
 
+    public MongoDatabase(MongoConfig mongoConfig){
+        this.mongoConfig = mongoConfig;
+    }
+
     @Override
     public String getName() {
         return "mongodb";
-    }
-
-    @Override
-    public Class<MongoConfig> getConfigType() {
-        return MongoConfig.class;
-    }
-
-    @Override
-    public MongoConfig getConfig() {
-        return mongoConfig;
-    }
-
-    @Override
-    public String getFileName() {
-        return "mongo.json";
-    }
-
-    @Override
-    public void loadConfig(MongoConfig config) {
-        this.mongoConfig = config;
-    }
-
-    @Override
-    public void saveConfig() {
-        EventCore.getInstance().getConfigRegistry().saveConfig(this);
     }
 
     @Override
@@ -73,6 +51,7 @@ public class MongoDatabase extends DatabaseProvider<MongoConfig> implements IPer
         datastore = morphia.createDatastore(mongoClient, mongoConfig.getDatabase());
         datastore.ensureIndexes();
         this.connected = true;
+        EventCore.getInstance().getEventRegistry().handleEvent(new MongoLoadedEvent());
     }
 
     public void mapPackage(String packageToMap){
@@ -99,7 +78,6 @@ public class MongoDatabase extends DatabaseProvider<MongoConfig> implements IPer
         return datastore;
     }
 
-    @Override
     public EventPlayer getOrCreatePlayer(UUID uuid, String username) {
         EventPlayer player = getPlayer(uuid);
         if(player == null){
@@ -112,53 +90,48 @@ public class MongoDatabase extends DatabaseProvider<MongoConfig> implements IPer
         return player;
     }
 
-    @Override
     public EventPlayer getPlayer(String username) {
        return datastore.createQuery(EventPlayer.class).field("lastUsername").equalIgnoreCase(username).first();
     }
 
-    @Override
     public EventPlayer getPlayer(UUID uuid) {
         return datastore.createQuery(EventPlayer.class).field("uuid").equal(uuid).first();
     }
 
-    @Override
     public void savePlayer(EventPlayer player) {
         save(player);
     }
 
-    @Override
     public List<EventPlayer> getPlayers() {
         return datastore.createQuery(EventPlayer.class).asList();
     }
 
-    @Override
     public EventRank getLowestRank() {
-        return datastore.createQuery(EventRank.class).order(Sort.descending("power")).first();
+        return datastore.createQuery(EventRank.class).order(Sort.ascending("power")).first();
     }
 
-    @Override
     public List<EventRank> getRanks() {
         return datastore.createQuery(EventRank.class).order(Sort.descending("power")).asList();
     }
 
-    @Override
     public void saveRank(EventRank eventRank) {
         save(eventRank);
     }
 
-    @Override
+    public EventSetting getSetting(EventSetting setting){
+        EventSetting settingInDB = datastore.createQuery(EventSetting.class).field("group").equalIgnoreCase(setting.getGroup()).field("name").equalIgnoreCase(setting.getName()).first();
+        return settingInDB == null ? setting : settingInDB;
+    }
+
+    public void saveSetting(EventSetting setting){
+        datastore.save(setting);
+    }
+
     public <T> T get(Class<T> object) {
         return datastore.createQuery(object).first();
     }
 
-    @Override
     public void save(Object object) {
         datastore.save(object);
-    }
-
-    @Override
-    public ModuleConfig getModuleConfig(Module module) {
-        return getDatastore().createQuery(ModuleConfig.class).field("moduleName").equalIgnoreCase(module.getName()).first();
     }
 }

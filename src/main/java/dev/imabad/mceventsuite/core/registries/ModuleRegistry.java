@@ -1,12 +1,13 @@
 package dev.imabad.mceventsuite.core.registries;
 
 import dev.imabad.mceventsuite.core.EventCore;
+import dev.imabad.mceventsuite.core.api.BaseConfig;
+import dev.imabad.mceventsuite.core.api.IConfigProvider;
 import dev.imabad.mceventsuite.core.api.IRegistry;
 import dev.imabad.mceventsuite.core.api.modules.Module;
 import dev.imabad.mceventsuite.core.api.exceptions.CircularDependencyException;
 import dev.imabad.mceventsuite.core.api.exceptions.NotRegisteredException;
-import dev.imabad.mceventsuite.core.api.modules.ModuleConfig;
-import dev.imabad.mceventsuite.core.modules.mongo.MongoDatabase;
+
 import java.util.HashMap;
 
 public class ModuleRegistry implements IRegistry {
@@ -29,6 +30,9 @@ public class ModuleRegistry implements IRegistry {
     }
 
     private void loadModuleAndDependencies(Module module){
+        if(module.isEnabled()){
+           return;
+        }
         if(module.getDependencies() != null && module.getDependencies().size() > 0){
             if(module.getDependencies().contains(module)){
                 throw new CircularDependencyException(module, module);
@@ -40,9 +44,9 @@ public class ModuleRegistry implements IRegistry {
                 loadModuleAndDependencies(module);
             }
         }
-        if(module.hasModuleConfig()){
-            ModuleConfig moduleConfig = EventCore.getInstance().getDatabaseRegistry().getPersistentDatabase().getModuleConfig(module);
-            module.loadConfig(moduleConfig);
+        if(module instanceof IConfigProvider){
+            BaseConfig baseConfig = EventCore.getInstance().getConfigLoader().getOrLoadConfig((IConfigProvider) module);
+            ((IConfigProvider)module).loadConfig(baseConfig);
         }
         module.onEnable();
     }

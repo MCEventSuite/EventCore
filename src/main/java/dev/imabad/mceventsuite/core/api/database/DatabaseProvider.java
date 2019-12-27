@@ -1,8 +1,6 @@
 package dev.imabad.mceventsuite.core.api.database;
 
-import dev.imabad.mceventsuite.core.api.IConfigProvider;
-
-public abstract class DatabaseProvider<T extends BaseDatabaseConfig> implements IDatabase, IConfigProvider<T> {
+public abstract class DatabaseProvider implements IDatabase {
 
     private boolean connected = false;
 

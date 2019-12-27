@@ -1,6 +1,8 @@
 package dev.imabad.mceventsuite.core.api.modules;
 
 import com.mongodb.lang.Nullable;
+import dev.imabad.mceventsuite.core.api.BaseConfig;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -19,12 +21,6 @@ public abstract class Module {
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
     public abstract List<Module> getDependencies();
-
-    public boolean hasModuleConfig() { return true; }
-
-    public abstract void loadConfig(@Nullable ModuleConfig moduleConfig);
-
-    public abstract ModuleConfig getConfig();
 
     public List<String> getPermissions(){
         return Collections.emptyList();
