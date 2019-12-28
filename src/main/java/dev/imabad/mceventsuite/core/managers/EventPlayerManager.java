@@ -21,4 +21,12 @@ public class EventPlayerManager {
         return players.get(player.getUuid());
     }
 
+    public void removePlayer(IPlayer player){
+        players.remove(player.getUUID());
+    }
+
+    public IPlayer getPlayer(UUID uuid){
+        return players.getOrDefault(uuid, null);
+    }
+
 }

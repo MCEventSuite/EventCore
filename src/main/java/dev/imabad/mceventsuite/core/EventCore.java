@@ -1,7 +1,9 @@
 package dev.imabad.mceventsuite.core;
 
+import dev.imabad.mceventsuite.core.api.actions.IActionExecutor;
 import dev.imabad.mceventsuite.core.config.EventSettings;
 import dev.imabad.mceventsuite.core.managers.EventPlayerManager;
+import dev.imabad.mceventsuite.core.modules.join.JoinModule;
 import dev.imabad.mceventsuite.core.modules.mongo.MongoLoadedEvent;
 import dev.imabad.mceventsuite.core.modules.mongo.MongoModule;
 import dev.imabad.mceventsuite.core.registries.EventRegistry;
@@ -24,6 +26,7 @@ public class EventCore {
 
     private EventPlayerManager eventPlayerManager;
 
+    private IActionExecutor actionExecutor;
     private EventSettings eventSettings;
 
     public EventCore(File configFolder){
@@ -36,6 +39,7 @@ public class EventCore {
             eventPlayerManager = new EventPlayerManager();
         });
         moduleRegistry.addModule(new MongoModule());
+        moduleRegistry.addModule(new JoinModule());
         moduleRegistry.enableModules();
     }
 
@@ -59,4 +63,11 @@ public class EventCore {
         return eventRegistry;
     }
 
+    public void setActionExecutor(IActionExecutor actionExecutor) {
+        this.actionExecutor = actionExecutor;
+    }
+
+    public IActionExecutor getActionExecutor() {
+        return actionExecutor;
+    }
 }

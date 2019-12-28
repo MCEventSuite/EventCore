@@ -20,6 +20,7 @@ public class ModuleRegistry implements IRegistry {
 
     public <T extends Module> void addModule(T module){
         modules.put(module.getClass(), module);
+//        loadModuleAndDependencies(module);
     }
 
     public <T extends Module> T getModule(Class<T> clazz){
