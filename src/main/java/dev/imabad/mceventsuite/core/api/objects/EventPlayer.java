@@ -1,20 +1,11 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
-import dev.imabad.mceventsuite.core.EventCore;
-import dev.imabad.mceventsuite.core.modules.mongo.MongoModule;
 import dev.imabad.mceventsuite.core.util.PropertyMap;
-import dev.morphia.annotations.Entity;
-import dev.morphia.annotations.Field;
-import dev.morphia.annotations.Id;
-import dev.morphia.annotations.Index;
-import dev.morphia.annotations.Indexes;
-import dev.morphia.annotations.Reference;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Entity("event_players")
-@Indexes({@Index(value="uuid", fields = @Field("uuid")), @Index(value="username", fields= @Field("lastUsername"))})
 public class EventPlayer {
 
     private static PropertyMap<String, Object> defaultProperties = new PropertyMap<>();
@@ -22,11 +13,8 @@ public class EventPlayer {
     public static void addDefault(String name, Object defaultValue){
         defaultProperties.put(name, defaultValue);
     }
-
-    @Id
     private UUID uuid;
     private String lastUsername;
-    @Reference(lazy = true)
     private EventRank rank;
     private List<String> permissions;
     private PropertyMap<String, Object> properties;
@@ -44,7 +32,7 @@ public class EventPlayer {
     public EventPlayer(UUID uuid, String username){
         this.uuid = uuid;
         this.lastUsername = username;
-        this.rank = EventCore.getInstance().getModuleRegistry().getModule(MongoModule.class).getMongoDatabase().getLowestRank();
+//        this.rank = EventCore.getInstance().getModuleRegistry().getModule(MongoModule.class).getMongoDatabase().getLowestRank();
         this.properties = defaultProperties;
     }
 

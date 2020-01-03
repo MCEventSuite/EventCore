@@ -1,20 +1,11 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
 
-import dev.morphia.annotations.Entity;
-import dev.morphia.annotations.Field;
-import dev.morphia.annotations.Id;
-import dev.morphia.annotations.Index;
-import dev.morphia.annotations.Indexes;
 import java.util.List;
-import org.bson.types.ObjectId;
 
-@Entity("event_ranks")
-@Indexes(@Index(value="name", fields = @Field("name")))
 public class EventRank {
 
-    @Id
-    private ObjectId id;
+    private int id;
     private int power;
     private String name;
     private String prefix;

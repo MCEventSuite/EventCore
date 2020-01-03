@@ -1,11 +1,9 @@
 package dev.imabad.mceventsuite.core.api.actions;
 
-import dev.morphia.annotations.Entity;
 
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
-@Entity
 public class Action {
 
     private ActionType type;

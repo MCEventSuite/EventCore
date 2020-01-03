@@ -1,12 +1,7 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
-import dev.morphia.annotations.Entity;
-import dev.morphia.annotations.Id;
-
-@Entity("settings")
 public class EventSetting {
 
-    @Id
     private String name;
     private Object value;
     private String group;

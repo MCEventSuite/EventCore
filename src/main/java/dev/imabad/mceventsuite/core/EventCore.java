@@ -3,12 +3,10 @@ package dev.imabad.mceventsuite.core;
 import dev.imabad.mceventsuite.core.api.actions.IActionExecutor;
 import dev.imabad.mceventsuite.core.config.EventSettings;
 import dev.imabad.mceventsuite.core.managers.EventPlayerManager;
-import dev.imabad.mceventsuite.core.modules.join.JoinModule;
-import dev.imabad.mceventsuite.core.modules.mongo.MongoLoadedEvent;
-import dev.imabad.mceventsuite.core.modules.mongo.MongoModule;
+import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
 import dev.imabad.mceventsuite.core.registries.EventRegistry;
-import dev.imabad.mceventsuite.core.util.ConfigLoader;
 import dev.imabad.mceventsuite.core.registries.ModuleRegistry;
+import dev.imabad.mceventsuite.core.util.ConfigLoader;
 
 import java.io.File;
 
@@ -34,13 +32,10 @@ public class EventCore {
         configLoader = new ConfigLoader(configFolder);
         moduleRegistry = new ModuleRegistry();
         eventRegistry = new EventRegistry();
-        eventRegistry.registerListener(MongoLoadedEvent.class, (event) -> {
-            eventSettings = new EventSettings();
-            eventPlayerManager = new EventPlayerManager();
-        });
-        moduleRegistry.addModule(new MongoModule());
-        moduleRegistry.addModule(new JoinModule());
+        moduleRegistry.addModule(new MySQLModule());
         moduleRegistry.enableModules();
+        eventSettings = new EventSettings();
+        eventPlayerManager = new EventPlayerManager();
     }
 
     public ConfigLoader getConfigLoader() {
