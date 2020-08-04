@@ -1,11 +1,17 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
+import dev.imabad.mceventsuite.core.EventCore;
+import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
+import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
 import dev.imabad.mceventsuite.core.util.PropertyMap;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Entity
+@Table(name = "players")
 public class EventPlayer {
 
     private static PropertyMap<String, Object> defaultProperties = new PropertyMap<>();
@@ -13,13 +19,15 @@ public class EventPlayer {
     public static void addDefault(String name, Object defaultValue){
         defaultProperties.put(name, defaultValue);
     }
+
+    @org.hibernate.annotations.Type(type="uuid-char")
     private UUID uuid;
     private String lastUsername;
     private EventRank rank;
     private List<String> permissions;
     private PropertyMap<String, Object> properties;
 
-    EventPlayer(){}
+    protected EventPlayer(){}
 
     protected EventPlayer(UUID uuid, String lastUsername, EventRank rank, List<String> permissions, PropertyMap<String, Object> properties) {
         this.uuid = uuid;
@@ -32,14 +40,22 @@ public class EventPlayer {
     public EventPlayer(UUID uuid, String username){
         this.uuid = uuid;
         this.lastUsername = username;
-//        this.rank = EventCore.getInstance().getModuleRegistry().getModule(MongoModule.class).getMongoDatabase().getLowestRank();
+        this.rank = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(RankDAO.class).getLowestRank();
         this.properties = defaultProperties;
     }
 
+    @Id
+    @Column(name="uuid", unique = true, nullable = false)
+    @org.hibernate.annotations.Type(type="uuid-char")
     public UUID getUuid() {
         return uuid;
     }
 
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    @Column(name = "last_username")
     public String getLastUsername() {
         return lastUsername;
     }
@@ -48,6 +64,8 @@ public class EventPlayer {
         this.lastUsername = lastUsername;
     }
 
+    @OneToOne
+    @JoinColumn(name="rank_id", referencedColumnName = "id")
     public EventRank getRank() {
         return rank;
     }
@@ -56,8 +74,13 @@ public class EventPlayer {
         this.rank = rank;
     }
 
+    @ElementCollection
     public List<String> getPermissions() {
         return permissions;
+    }
+
+    public void setPermissions(List<String> permissions) {
+        this.permissions = permissions;
     }
 
     public void addPermission(String permission){

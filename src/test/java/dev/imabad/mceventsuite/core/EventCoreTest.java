@@ -1,6 +1,5 @@
 package dev.imabad.mceventsuite.core;
 
-import dev.imabad.mceventsuite.core.modules.mongo.MongoLoadedEvent;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

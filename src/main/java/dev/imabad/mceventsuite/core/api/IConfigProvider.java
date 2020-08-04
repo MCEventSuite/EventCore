@@ -11,4 +11,6 @@ public interface IConfigProvider<T extends BaseConfig> {
     void loadConfig(T config);
 
     void saveConfig();
+
+    boolean saveOnQuit();
 }

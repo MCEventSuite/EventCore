@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class ModuleRegistry implements IRegistry {
 
-    private HashMap<Class<? extends Module>, Module> modules;
+    private final HashMap<Class<? extends Module>, Module> modules;
 
     public ModuleRegistry(){
         modules = new HashMap<>();
@@ -46,15 +46,33 @@ public class ModuleRegistry implements IRegistry {
             }
         }
         if(module instanceof IConfigProvider){
-            BaseConfig baseConfig = EventCore.getInstance().getConfigLoader().getOrLoadConfig((IConfigProvider) module);
+            BaseConfig baseConfig = EventCore.getInstance().getConfigLoader().getOrLoadConfig((IConfigProvider<?>) module);
             ((IConfigProvider)module).loadConfig(baseConfig);
         }
         module.onEnable();
     }
 
+    private void unloadModule(Module module){
+        if(!module.isEnabled()){
+            return;
+        }
+        if(module instanceof IConfigProvider){
+            if(((IConfigProvider<?>) module).saveOnQuit()){
+                ((IConfigProvider<?>) module).saveConfig();
+            }
+        }
+        module.onDisable();
+    }
+
     public void enableModules(){
         for(Module module : modules.values()){
             loadModuleAndDependencies(module);
+        }
+    }
+
+    public void disableModules(){
+        for(Module module : modules.values()){
+            unloadModule(module);
         }
     }
 

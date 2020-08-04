@@ -11,6 +11,7 @@ public class MySQLModule extends Module implements IConfigProvider<MySQLConfig> 
 
     private MySQLConfig mySQLConfig;
     private MySQLDatabase mySQLDatabase;
+    private Thread databaseThread;
 
     @Override
     public String getName() {
@@ -20,13 +21,19 @@ public class MySQLModule extends Module implements IConfigProvider<MySQLConfig> 
     @Override
     public void onEnable() {
         this.mySQLDatabase = new MySQLDatabase(this.mySQLConfig);
-        this.mySQLDatabase.connect();
+        databaseThread = new Thread(mySQLDatabase::connect);
+        databaseThread.setContextClassLoader(getClass().getClassLoader());
+        databaseThread.start();
+        this.setEnabled(true);
     }
 
     @Override
     public void onDisable() {
         if(this.mySQLDatabase.isConnected())
             this.mySQLDatabase.disconnect();
+        if(databaseThread != null && databaseThread.isAlive())
+            databaseThread.stop();
+        this.setEnabled(false);
     }
 
     @Override
@@ -58,6 +65,11 @@ public class MySQLModule extends Module implements IConfigProvider<MySQLConfig> 
     @Override
     public void saveConfig() {
 
+    }
+
+    @Override
+    public boolean saveOnQuit() {
+        return false;
     }
 
 

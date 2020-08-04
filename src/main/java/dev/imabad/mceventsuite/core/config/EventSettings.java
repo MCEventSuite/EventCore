@@ -2,7 +2,9 @@ package dev.imabad.mceventsuite.core.config;
 
 import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.objects.EventSetting;
-import dev.imabad.mceventsuite.core.modules.mongo.MongoModule;
+import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
+import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
+import dev.imabad.mceventsuite.core.modules.mysql.dao.SettingDAO;
 
 public class EventSettings {
 
@@ -12,26 +14,26 @@ public class EventSettings {
 
 
     public EventSettings(){
-        this.eventName = EventCore.getInstance().getModuleRegistry().getModule(MongoModule.class).getMongoDatabase().getSetting(eventName);
-        this.eventIP = EventCore.getInstance().getModuleRegistry().getModule(MongoModule.class).getMongoDatabase().getSetting(eventIP);
-        this.eventOrganiser = EventCore.getInstance().getModuleRegistry().getModule(MongoModule.class).getMongoDatabase().getSetting(eventOrganiser);
+        this.eventName = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(SettingDAO.class).getSetting(eventName);
+        this.eventIP = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(SettingDAO.class).getSetting(eventIP);
+        this.eventOrganiser = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(SettingDAO.class).getSetting(eventOrganiser);
     }
 
     public String getEventName() {
-        return (String) eventName.getValue();
+        return eventName.getValueObject(String.class);
     }
 
     public String getEventIP() {
-        return (String) eventIP.getValue();
+        return eventIP.getValueObject(String.class);
     }
 
     public String getEventOrganiser() {
-        return (String) eventOrganiser.getValue();
+        return eventOrganiser.getValueObject(String.class);
     }
 
     public void save(){
-        EventCore.getInstance().getModuleRegistry().getModule(MongoModule.class).getMongoDatabase().save(eventName);
-        EventCore.getInstance().getModuleRegistry().getModule(MongoModule.class).getMongoDatabase().save(eventIP);
-        EventCore.getInstance().getModuleRegistry().getModule(MongoModule.class).getMongoDatabase().save(eventOrganiser);
+        EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(SettingDAO.class).saveSetting(eventName);
+        EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(SettingDAO.class).saveSetting(eventIP);
+        EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(SettingDAO.class).saveSetting(eventOrganiser);
     }
 }

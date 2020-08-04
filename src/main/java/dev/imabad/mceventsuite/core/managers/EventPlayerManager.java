@@ -4,6 +4,7 @@ import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import dev.imabad.mceventsuite.core.api.player.IPlayer;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
+import dev.imabad.mceventsuite.core.modules.mysql.dao.PlayerDAO;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -14,7 +15,7 @@ public class EventPlayerManager {
 
     public EventPlayer addPlayer(IPlayer player){
         players.put(player.getUUID(), player);
-        return EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getPlayer(player.getUUID());
+        return EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(PlayerDAO.class).getPlayer(player.getUUID());
     }
 
     public IPlayer getPlayerFromRef(EventPlayer player){

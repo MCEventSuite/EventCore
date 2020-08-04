@@ -2,8 +2,10 @@ package dev.imabad.mceventsuite.core;
 
 import dev.imabad.mceventsuite.core.api.actions.IActionExecutor;
 import dev.imabad.mceventsuite.core.config.EventSettings;
+import dev.imabad.mceventsuite.core.events.CoreShutdownEvent;
 import dev.imabad.mceventsuite.core.managers.EventPlayerManager;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
+import dev.imabad.mceventsuite.core.modules.mysql.events.MySQLLoadedEvent;
 import dev.imabad.mceventsuite.core.registries.EventRegistry;
 import dev.imabad.mceventsuite.core.registries.ModuleRegistry;
 import dev.imabad.mceventsuite.core.util.ConfigLoader;
@@ -30,12 +32,14 @@ public class EventCore {
     public EventCore(File configFolder){
         instance = this;
         configLoader = new ConfigLoader(configFolder);
-        moduleRegistry = new ModuleRegistry();
         eventRegistry = new EventRegistry();
+        eventRegistry.registerListener(MySQLLoadedEvent.class, (event) -> {
+            eventSettings = new EventSettings();
+            eventPlayerManager = new EventPlayerManager();
+        });
+        moduleRegistry = new ModuleRegistry();
         moduleRegistry.addModule(new MySQLModule());
         moduleRegistry.enableModules();
-        eventSettings = new EventSettings();
-        eventPlayerManager = new EventPlayerManager();
     }
 
     public ConfigLoader getConfigLoader() {
@@ -64,5 +68,11 @@ public class EventCore {
 
     public IActionExecutor getActionExecutor() {
         return actionExecutor;
+    }
+
+    public void shutdown(){
+        System.out.println("[EventCore] Shutting down core");
+        eventRegistry.handleEvent(new CoreShutdownEvent());
+        moduleRegistry.disableModules();
     }
 }
