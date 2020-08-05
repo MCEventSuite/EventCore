@@ -1,5 +1,8 @@
 package dev.imabad.mceventsuite.core.api.player;
 
+import dev.imabad.mceventsuite.core.api.actions.Action;
+import dev.imabad.mceventsuite.core.api.objects.EventRank;
+
 import java.util.UUID;
 
 public interface IPlayer {
@@ -27,4 +30,6 @@ public interface IPlayer {
     void setVisible(boolean visible);
 
     boolean isVisible();
+
+    void executeAction(Action action);
 }

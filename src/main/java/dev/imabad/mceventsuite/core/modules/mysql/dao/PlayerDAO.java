@@ -88,6 +88,7 @@ public class PlayerDAO extends DAO {
         } catch (RuntimeException e) {
             assert tx != null;
             tx.rollback();
+            e.printStackTrace();
         }
     }
 }

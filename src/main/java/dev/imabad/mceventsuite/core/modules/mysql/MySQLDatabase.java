@@ -65,6 +65,7 @@ public class MySQLDatabase extends DatabaseProvider {
             prop.setProperty("hibernate.connection.password", mySQLConfig.getPassword());
         }
         prop.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
+        prop.setProperty("hibernate.hbm2ddl.auto", "update");
         prop.setProperty("show_sql", "true");
         Configuration configuration = new Configuration().addProperties(prop);
         configuration.addAnnotatedClass(EventSetting.class);

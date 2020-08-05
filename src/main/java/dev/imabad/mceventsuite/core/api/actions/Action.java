@@ -11,6 +11,7 @@ public class Action {
 
     protected Action(ActionType type){
         this.type = type;
+        variables = new HashMap<>();
         type.getVariables().forEach(variable -> {
             variables.put(variable.getName(), variable.getDefaultValue());
         });

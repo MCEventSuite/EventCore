@@ -26,7 +26,9 @@ public class EventCoreMain {
             EventPlayer eventPlayer = mySQLDatabase.getDAO(PlayerDAO.class).getOrCreatePlayer(UUID.fromString("e1949d31-4f97-423a-8229-690fd6756b1c"), "Rushmead");
             System.out.println("Player: " + eventPlayer.getLastUsername());
             System.out.println("Rank: " + eventPlayer.getRank().getName());
-
+            System.out.println("Coins: " + eventPlayer.getIntProperty("coins"));
+            eventPlayer.setProperty("coins", eventPlayer.getIntProperty("coins") + 5);
+            mySQLDatabase.getDAO(PlayerDAO.class).savePlayer(eventPlayer);
         });
         Thread.sleep(1000 * 10);
         EventCore.getInstance().shutdown();

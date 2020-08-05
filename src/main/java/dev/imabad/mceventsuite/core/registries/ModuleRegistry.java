@@ -20,7 +20,11 @@ public class ModuleRegistry implements IRegistry {
 
     public <T extends Module> void addModule(T module){
         modules.put(module.getClass(), module);
-//        loadModuleAndDependencies(module);
+    }
+
+    public <T extends Module> void addAndEnableModule(T module){
+        modules.put(module.getClass(), module);
+        loadModuleAndDependencies(module);
     }
 
     public <T extends Module> T getModule(Class<T> clazz){
@@ -75,6 +79,15 @@ public class ModuleRegistry implements IRegistry {
             unloadModule(module);
         }
     }
+
+    public <T extends Module> void enableModule(T module){
+        loadModuleAndDependencies(module);
+    }
+
+    public <T extends Module> void disableModule(T module){
+        unloadModule(module);
+    }
+
 
     @Override
     public String getName() {

@@ -2,9 +2,11 @@ package dev.imabad.mceventsuite.core.api.objects;
 
 import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
+import dev.imabad.mceventsuite.core.modules.mysql.PropertyMapConverter;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
 import dev.imabad.mceventsuite.core.util.PropertyMap;
 
+import javax.annotation.Resource;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.UUID;
 @Table(name = "players")
 public class EventPlayer {
 
-    private static PropertyMap<String, Object> defaultProperties = new PropertyMap<>();
+    private static PropertyMap defaultProperties = new PropertyMap();
 
     public static void addDefault(String name, Object defaultValue){
         defaultProperties.put(name, defaultValue);
@@ -25,11 +27,11 @@ public class EventPlayer {
     private String lastUsername;
     private EventRank rank;
     private List<String> permissions;
-    private PropertyMap<String, Object> properties;
+    private PropertyMap properties = defaultProperties;
 
     protected EventPlayer(){}
 
-    protected EventPlayer(UUID uuid, String lastUsername, EventRank rank, List<String> permissions, PropertyMap<String, Object> properties) {
+    protected EventPlayer(UUID uuid, String lastUsername, EventRank rank, List<String> permissions, PropertyMap properties) {
         this.uuid = uuid;
         this.lastUsername = lastUsername;
         this.rank = rank;
@@ -101,8 +103,18 @@ public class EventPlayer {
         return this.permissions == null ? rank.getPermissions().contains(permission) : (this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission)));
     }
 
+    @Column(name="properties")
+    @Convert(converter = PropertyMapConverter.class)
+    public PropertyMap getProperties() {
+        return properties;
+    }
+
+    public void setProperties(PropertyMap properties) {
+        this.properties = properties;
+    }
+
     public int getIntProperty(String name){
-        if(properties.containsKey(name)){
+        if(properties != null && properties.containsKey(name)){
             return properties.getIntProperty(name);
         } else if (defaultProperties.containsKey(name)){
             return defaultProperties.getIntProperty(name);
@@ -111,7 +123,7 @@ public class EventPlayer {
     }
 
     public String getStringProperty(String name){
-        if(properties.containsKey(name)){
+        if(properties != null && properties.containsKey(name)){
             return properties.getStringProperty(name);
         } else if (defaultProperties.containsKey(name)){
             return defaultProperties.getStringProperty(name);
@@ -120,7 +132,7 @@ public class EventPlayer {
     }
 
     public double getDoubleProperty(String name){
-        if(properties.containsKey(name)){
+        if(properties != null && properties.containsKey(name)){
             return properties.getDoubleProperty(name);
         } else if (defaultProperties.containsKey(name)){
             return defaultProperties.getDoubleProperty(name);
@@ -129,7 +141,7 @@ public class EventPlayer {
     }
 
     public float getFloatProperty(String name){
-        if(properties.containsKey(name)){
+        if(properties != null && properties.containsKey(name)){
             return properties.getFloatProperty(name);
         } else if (defaultProperties.containsKey(name)){
             return defaultProperties.getFloatProperty(name);
@@ -138,11 +150,18 @@ public class EventPlayer {
     }
 
     public Object getProperty(String name){
-        if(properties.containsKey(name)){
+        if(properties != null && properties.containsKey(name)){
             return properties.get(name);
         } else if(defaultProperties.containsKey(name)){
             return defaultProperties.get(name);
         }
         return null;
+    }
+
+    public void setProperty(String name, Object value){
+        if(this.properties == null){
+            this.properties = new PropertyMap();
+        }
+        this.properties.put(name, value);
     }
 }

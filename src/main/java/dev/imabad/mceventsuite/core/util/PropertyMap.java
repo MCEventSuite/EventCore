@@ -2,9 +2,12 @@ package dev.imabad.mceventsuite.core.util;
 
 import java.util.HashMap;
 
-public class PropertyMap<K, V> extends HashMap {
+public class PropertyMap extends HashMap<String, Object> {
 
     public int getIntProperty(String name){
+        if(this.get(name) instanceof Double){
+            return ((Double) this.get(name)).intValue();
+        }
         return (int) this.get(name);
     }
 
