@@ -42,11 +42,22 @@ public class ModuleRegistry implements IRegistry {
             if(module.getDependencies().contains(module)){
                 throw new CircularDependencyException(module, module);
             }
-            for(Module dependency : module.getDependencies()){
-                if(dependency.getDependencies().contains(module)){
-                    throw new CircularDependencyException(module, dependency);
+            for(Class<? extends Module> dependency : module.getDependencies()){
+                if(modules.containsKey(dependency)){
+                    Module dependencyModule = modules.get(dependency);
+                    if(dependencyModule.getDependencies().contains(module)){
+                        throw new CircularDependencyException(module, dependencyModule);
+                    }
+                    if(!dependencyModule.isEnabled()){
+                        loadModuleAndDependencies(module);
+                    }
+                } else {
+                    try {
+                        addAndEnableModule(dependency.newInstance());
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
                 }
-                loadModuleAndDependencies(module);
             }
         }
         if(module instanceof IConfigProvider){

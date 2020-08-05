@@ -17,7 +17,7 @@ public abstract class Module {
 
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
-    public abstract List<Module> getDependencies();
+    public abstract List<Class<? extends Module>> getDependencies();
 
     public List<String> getPermissions(){
         return Collections.emptyList();

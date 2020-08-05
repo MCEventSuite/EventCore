@@ -37,7 +37,7 @@ public class MySQLModule extends Module implements IConfigProvider<MySQLConfig> 
     }
 
     @Override
-    public List<Module> getDependencies() {
+    public List<Class<? extends Module>> getDependencies() {
         return Collections.emptyList();
     }
 

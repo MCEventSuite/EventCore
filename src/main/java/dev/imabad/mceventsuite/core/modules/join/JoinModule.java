@@ -29,7 +29,7 @@ public class JoinModule extends Module {
     }
 
     @Override
-    public List<Module> getDependencies() {
+    public List<Class<? extends Module>> getDependencies() {
         return Arrays.asList();
     }
 

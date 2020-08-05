@@ -29,8 +29,15 @@ public class EventCore {
     private IActionExecutor actionExecutor;
     private EventSettings eventSettings;
 
+    private String identifier;
+
     public EventCore(File configFolder){
         instance = this;
+        if(System.getenv("CORE_ID") != null) {
+            identifier = System.getenv("CORE_ID");
+        } else {
+            identifier = "unknown";
+        }
         configLoader = new ConfigLoader(configFolder);
         eventRegistry = new EventRegistry();
         eventRegistry.registerListener(MySQLLoadedEvent.class, (event) -> {
@@ -74,5 +81,9 @@ public class EventCore {
         System.out.println("[EventCore] Shutting down core");
         eventRegistry.handleEvent(new CoreShutdownEvent());
         moduleRegistry.disableModules();
+    }
+
+    public String getIdentifier() {
+        return identifier;
     }
 }
