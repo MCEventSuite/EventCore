@@ -5,7 +5,7 @@ import java.util.List;
 
 public abstract class Module {
 
-    public boolean enabled = false;
+    private boolean enabled = false;
 
     public abstract String getName();
 

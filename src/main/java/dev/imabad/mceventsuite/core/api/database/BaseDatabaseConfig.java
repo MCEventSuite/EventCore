@@ -23,7 +23,6 @@ public abstract class BaseDatabaseConfig extends BaseConfig {
         return database;
     }
 
-
     public int getPort() {
         return port;
     }

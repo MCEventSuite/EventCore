@@ -54,16 +54,22 @@ public class MySQLDatabase extends DatabaseProvider {
     public void connect() {
         Properties prop= new Properties();
 
-        prop.setProperty("hibernate.connection.url", String.format("jdbc:mysql://%s:%d/%s", mySQLConfig.getHostname(), mySQLConfig.getPort(), mySQLConfig.getDatabase()));
+        String connectionString = mySQLConfig.getPort() != 0
+            ? String.format("jdbc:mysql://%s/%s", mySQLConfig.getHostname(), mySQLConfig.getDatabase())
+            : String.format("jdbc:mysql://%s:%d/%s", mySQLConfig.getHostname(), mySQLConfig.getPort(),
+                mySQLConfig.getDatabase());
+
+        prop.setProperty("hibernate.connection.url", connectionString);
 
         //You can use any database you want, I had it configured for Postgres
         prop.setProperty("hibernate.dialect", "org.hibernate.dialect.MariaDB53Dialect");
-        if(mySQLConfig.getUsername().length() > 0){
-            prop.setProperty("hibernate.connection.username", mySQLConfig.getUsername());
-        }
+
+        prop.setProperty("hibernate.connection.username", mySQLConfig.getUsername());
+
         if(mySQLConfig.getPassword().length() > 0) {
             prop.setProperty("hibernate.connection.password", mySQLConfig.getPassword());
         }
+
         prop.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
         prop.setProperty("hibernate.hbm2ddl.auto", "update");
         prop.setProperty("show_sql", "true");

@@ -64,7 +64,18 @@ public class ModuleRegistry implements IRegistry {
             BaseConfig baseConfig = EventCore.getInstance().getConfigLoader().getOrLoadConfig((IConfigProvider<?>) module);
             ((IConfigProvider)module).loadConfig(baseConfig);
         }
-        module.onEnable();
+
+        try {
+            module.onEnable();
+            module.setEnabled(true);
+        } catch (Exception ex) {
+            System.err.printf("[EventCore] Unable to enable module %s\n", module.getName());
+            ex.printStackTrace();
+
+            // TODO(oliver): Add support for optional modules
+            // TODO(oliver): Call some sort of abstract shutdown hook, instead of System.exit
+            System.exit(1);
+        }
     }
 
     private void unloadModule(Module module){
@@ -76,7 +87,9 @@ public class ModuleRegistry implements IRegistry {
                 ((IConfigProvider<?>) module).saveConfig();
             }
         }
+
         module.onDisable();
+        module.setEnabled(false);
     }
 
     public void enableModules(){
