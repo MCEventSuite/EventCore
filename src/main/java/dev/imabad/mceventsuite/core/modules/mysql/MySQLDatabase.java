@@ -3,6 +3,7 @@ package dev.imabad.mceventsuite.core.modules.mysql;
 import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.database.DatabaseProvider;
 import dev.imabad.mceventsuite.core.api.database.DatabaseType;
+import dev.imabad.mceventsuite.core.api.objects.EventBooth;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import dev.imabad.mceventsuite.core.api.objects.EventRank;
 import dev.imabad.mceventsuite.core.api.objects.EventSetting;
@@ -33,7 +34,8 @@ public class MySQLDatabase extends DatabaseProvider {
         registerDAOs(
                 new PlayerDAO(this),
                 new RankDAO(this),
-                new SettingDAO(this)
+                new SettingDAO(this),
+                new BoothDAO(this)
         );
     }
 
@@ -70,9 +72,10 @@ public class MySQLDatabase extends DatabaseProvider {
         prop.setProperty("hibernate.hbm2ddl.auto", "update");
         prop.setProperty("show_sql", "true");
         configuration = new Configuration().addProperties(prop);
-//        configuration.addAnnotatedClass(EventSetting.class);
-//        configuration.addAnnotatedClass(EventPlayer.class);
-//        configuration.addAnnotatedClass(EventRank.class);
+        configuration.addAnnotatedClass(EventSetting.class);
+        configuration.addAnnotatedClass(EventPlayer.class);
+        configuration.addAnnotatedClass(EventRank.class);
+        configuration.addAnnotatedClass(EventBooth.class);
         configuration.addPackage("dev.imabad.mceventsuite");
         sessionFactory = configuration.buildSessionFactory();
         EventCore.getInstance().getEventRegistry().handleEvent(new MySQLLoadedEvent(this));

@@ -2,9 +2,7 @@ package dev.imabad.mceventsuite.core.api.actions;
 
 import dev.imabad.mceventsuite.core.actions.GiveItemAction;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
-import dev.imabad.mceventsuite.core.api.player.ILocation;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,7 +13,7 @@ public enum ActionType {
     CLEAR_INVENTORY,
     OPEN_MENU(new ActionVariable(String.class, "menuName", "")),
     SEND_MESSAGE(new ActionVariable(String.class, "message", "")),
-    TELEPORT_LOCATION(new ActionVariable(ILocation.class, "location", null)),
+    TELEPORT_LOCATION(),
     TELEPORT_PLAYER(new ActionVariable(EventPlayer.class, "player", null));
 
     private List<ActionVariable> variableList;

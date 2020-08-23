@@ -10,6 +10,7 @@ import dev.imabad.mceventsuite.core.util.PropertyMap;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -29,7 +30,7 @@ public abstract class EventPlayer {
     private List<String> permissions;
     private PropertyMap properties = defaultProperties;
 
-    private EventPlayer(){}
+    protected EventPlayer(){}
 
     protected EventPlayer(UUID uuid, String lastUsername, EventRank rank, List<String> permissions, PropertyMap properties) {
         this.uuid = uuid;
@@ -100,7 +101,19 @@ public abstract class EventPlayer {
     }
 
     public boolean hasPermission(String permission){
-        return this.permissions == null ? rank.getPermissions().contains(permission) : (this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission)));
+        boolean hasPerm = this.permissions == null ? rank.hasPermission(permission) : (this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission)));
+        if(!hasPerm && rank.isInheritsFromBelow()){
+            for(EventRank eventRank : EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(RankDAO.class).getRanks()){
+                if(eventRank.getPower() < rank.getPower() && rank.hasPermission(permission)){
+                    return true;
+                }
+            }
+        }
+        return hasPerm;
+    }
+
+    public boolean playerHasPermission(String permission){
+        return this.permissions != null && (this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission)));
     }
 
     @Column(name="properties")
@@ -168,4 +181,17 @@ public abstract class EventPlayer {
     public abstract void sendMessage(String message);
 
     public abstract void executeAction(Action action);
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EventPlayer that = (EventPlayer) o;
+        return uuid.equals(that.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uuid);
+    }
 }
