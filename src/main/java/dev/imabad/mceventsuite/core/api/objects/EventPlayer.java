@@ -1,12 +1,12 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
 import dev.imabad.mceventsuite.core.EventCore;
+import dev.imabad.mceventsuite.core.api.actions.Action;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
 import dev.imabad.mceventsuite.core.modules.mysql.PropertyMapConverter;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
 import dev.imabad.mceventsuite.core.util.PropertyMap;
 
-import javax.annotation.Resource;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "players")
-public class EventPlayer {
+public abstract class EventPlayer {
 
     private static PropertyMap defaultProperties = new PropertyMap();
 
@@ -29,7 +29,7 @@ public class EventPlayer {
     private List<String> permissions;
     private PropertyMap properties = defaultProperties;
 
-    protected EventPlayer(){}
+    private EventPlayer(){}
 
     protected EventPlayer(UUID uuid, String lastUsername, EventRank rank, List<String> permissions, PropertyMap properties) {
         this.uuid = uuid;
@@ -49,11 +49,11 @@ public class EventPlayer {
     @Id
     @Column(name="uuid", unique = true, nullable = false)
     @org.hibernate.annotations.Type(type="uuid-char")
-    public UUID getUuid() {
+    public UUID getUUID() {
         return uuid;
     }
 
-    public void setUuid(UUID uuid) {
+    public void setUUID(UUID uuid) {
         this.uuid = uuid;
     }
 
@@ -164,4 +164,8 @@ public class EventPlayer {
         }
         this.properties.put(name, value);
     }
+
+    public abstract void sendMessage(String message);
+
+    public abstract void executeAction(Action action);
 }

@@ -45,6 +45,7 @@ public class EventCore {
             eventPlayerManager = new EventPlayerManager();
         });
         moduleRegistry = new ModuleRegistry();
+        moduleRegistry.addAndEnableModule(new MySQLModule());
     }
 
     public ConfigLoader getConfigLoader() {

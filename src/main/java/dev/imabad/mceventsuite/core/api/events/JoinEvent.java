@@ -1,17 +1,16 @@
 package dev.imabad.mceventsuite.core.api.events;
 
-import dev.imabad.mceventsuite.core.api.events.CoreEvent;
-import dev.imabad.mceventsuite.core.api.player.IPlayer;
+import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 
 public class JoinEvent extends CoreEvent {
 
-    private IPlayer iPlayer;
+    private EventPlayer iPlayer;
 
-    public JoinEvent(IPlayer player){
+    public JoinEvent(EventPlayer player){
         this.iPlayer = player;
     }
 
-    public IPlayer getPlayer() {
+    public EventPlayer getPlayer() {
         return iPlayer;
     }
 }

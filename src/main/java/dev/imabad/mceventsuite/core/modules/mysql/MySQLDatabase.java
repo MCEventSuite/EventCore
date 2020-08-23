@@ -70,10 +70,10 @@ public class MySQLDatabase extends DatabaseProvider {
         prop.setProperty("hibernate.hbm2ddl.auto", "update");
         prop.setProperty("show_sql", "true");
         configuration = new Configuration().addProperties(prop);
-        configuration.addAnnotatedClass(EventSetting.class);
-        configuration.addAnnotatedClass(EventPlayer.class);
-        configuration.addAnnotatedClass(EventRank.class);
-        configuration.addPackage()
+//        configuration.addAnnotatedClass(EventSetting.class);
+//        configuration.addAnnotatedClass(EventPlayer.class);
+//        configuration.addAnnotatedClass(EventRank.class);
+        configuration.addPackage("dev.imabad.mceventsuite");
         sessionFactory = configuration.buildSessionFactory();
         EventCore.getInstance().getEventRegistry().handleEvent(new MySQLLoadedEvent(this));
     }
