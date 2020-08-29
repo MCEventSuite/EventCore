@@ -14,18 +14,24 @@ public class EventRank {
     private String prefix;
     private String suffix;
     private List<String> permissions;
+    private boolean inheritsFromBelow = true;
 
 
-    public EventRank(int power, String name, String prefix, String suffix, List<String> permissions) {
+    public EventRank(int power, String name, String prefix, String suffix, List<String> permissions, boolean inheritsFromBelow) {
         this.power = power;
         this.name = name;
         this.prefix = prefix;
         this.suffix = suffix;
         this.permissions = permissions;
+        this.inheritsFromBelow = inheritsFromBelow;
     }
 
-    public EventRank(int id, int power, String name, String prefix, String suffix, List<String> permissions){
-        this(power, name, prefix, suffix, permissions);
+    public EventRank(int power, String name, String prefix, String suffix, List<String> permissions) {
+        this(power, name, prefix, suffix, permissions, true);
+    }
+
+    public EventRank(int id, int power, String name, String prefix, String suffix, List<String> permissions, boolean inheritsFromBelow){
+        this(power, name, prefix, suffix, permissions, inheritsFromBelow);
         this.id = id;
     }
 
@@ -64,6 +70,11 @@ public class EventRank {
         return permissions;
     }
 
+    @Column(name = "inheritsFromBelow")
+    public boolean isInheritsFromBelow() {
+        return inheritsFromBelow;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -86,5 +97,13 @@ public class EventRank {
 
     public void setPermissions(List<String> permissions) {
         this.permissions = permissions;
+    }
+
+    public void setInheritsFromBelow(boolean inheritsFromBelow) {
+        this.inheritsFromBelow = inheritsFromBelow;
+    }
+
+    public boolean hasPermission(String permission){
+        return this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission));
     }
 }

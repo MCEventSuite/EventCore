@@ -3,6 +3,7 @@ package dev.imabad.mceventsuite.core.modules.mysql;
 import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.database.DatabaseProvider;
 import dev.imabad.mceventsuite.core.api.database.DatabaseType;
+import dev.imabad.mceventsuite.core.api.objects.EventBooth;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import dev.imabad.mceventsuite.core.api.objects.EventRank;
 import dev.imabad.mceventsuite.core.api.objects.EventSetting;
@@ -13,6 +14,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+import javax.persistence.Entity;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Properties;
@@ -22,6 +24,7 @@ public class MySQLDatabase extends DatabaseProvider {
 
     private MySQLConfig mySQLConfig;
     private SessionFactory sessionFactory;
+    private Configuration configuration;
 
     private Set<DAO> registeredDAOs;
 
@@ -31,7 +34,8 @@ public class MySQLDatabase extends DatabaseProvider {
         registerDAOs(
                 new PlayerDAO(this),
                 new RankDAO(this),
-                new SettingDAO(this)
+                new SettingDAO(this),
+                new BoothDAO(this)
         );
     }
 
@@ -73,12 +77,26 @@ public class MySQLDatabase extends DatabaseProvider {
         prop.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
         prop.setProperty("hibernate.hbm2ddl.auto", "update");
         prop.setProperty("show_sql", "true");
-        Configuration configuration = new Configuration().addProperties(prop);
+        configuration = new Configuration().addProperties(prop);
         configuration.addAnnotatedClass(EventSetting.class);
         configuration.addAnnotatedClass(EventPlayer.class);
         configuration.addAnnotatedClass(EventRank.class);
+        configuration.addAnnotatedClass(EventBooth.class);
+        configuration.addPackage("dev.imabad.mceventsuite");
         sessionFactory = configuration.buildSessionFactory();
         EventCore.getInstance().getEventRegistry().handleEvent(new MySQLLoadedEvent(this));
+    }
+
+    public void registerEntity(Class clazz){
+        if(configuration == null){
+            return;
+        }
+        if(Arrays.stream(clazz.getAnnotations()).noneMatch(annotation -> annotation instanceof Entity)){
+            return;
+        }
+        configuration.addAnnotatedClass(clazz);
+        sessionFactory.close();
+        sessionFactory = configuration.buildSessionFactory();
     }
 
     public void registerDAOs(DAO... daos){

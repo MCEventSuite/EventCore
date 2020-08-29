@@ -1,33 +1,25 @@
 package dev.imabad.mceventsuite.core.managers;
 
-import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
-import dev.imabad.mceventsuite.core.api.player.IPlayer;
-import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
-import dev.imabad.mceventsuite.core.modules.mysql.dao.PlayerDAO;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.UUID;
 
 public class EventPlayerManager {
 
-    private HashMap<UUID, IPlayer> players = new HashMap<>();
+    private HashMap<UUID, EventPlayer> players = new HashMap<>();
 
-    public EventPlayer addPlayer(IPlayer player){
+    public void addPlayer(EventPlayer player){
         players.put(player.getUUID(), player);
-        return EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(PlayerDAO.class).getPlayer(player.getUUID());
     }
 
-    public IPlayer getPlayerFromRef(EventPlayer player){
-        return players.get(player.getUuid());
-    }
-
-    public void removePlayer(IPlayer player){
+    public void removePlayer(EventPlayer player){
         players.remove(player.getUUID());
     }
 
-    public IPlayer getPlayer(UUID uuid){
-        return players.getOrDefault(uuid, null);
+    public Optional<EventPlayer> getPlayer(UUID uuid){
+        return Optional.ofNullable(players.get(uuid));
     }
 
 }

@@ -15,17 +15,43 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class RankDAO extends DAO {
+
+    private List<EventRank> ranks;
 
     public RankDAO(MySQLDatabase mySQLDatabase){
         super(mySQLDatabase);
     }
 
+    public Optional<EventRank> getRankByName(String name){
+        if(ranks == null){
+            getRanks(true);
+        }
+        return ranks.stream().filter(eventRank -> eventRank.getName().equalsIgnoreCase(name)).findFirst();
+    }
+
     public List<EventRank> getRanks(){
+        if(ranks != null){
+            return ranks;
+        }
         Session session = mySQLDatabase.getSession();
         try {
-            List<EventRank> ranks = session.createQuery("select r from EventRank r", EventRank.class).list();
+            ranks = session.createQuery("select r from EventRank r", EventRank.class).list();
+            return ranks;
+        } finally {
+            session.close();
+        }
+    }
+
+    public List<EventRank> getRanks(boolean refresh){
+        if(!refresh){
+            return getRanks();
+        }
+        Session session = mySQLDatabase.getSession();
+        try {
+            ranks = session.createQuery("select r from EventRank r", EventRank.class).list();
             return ranks;
         } finally {
             session.close();

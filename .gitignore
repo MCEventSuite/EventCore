@@ -2,5 +2,6 @@
 gradle/
 out/
 build/
-run/
+run
+.idea/
 mceventsuite/

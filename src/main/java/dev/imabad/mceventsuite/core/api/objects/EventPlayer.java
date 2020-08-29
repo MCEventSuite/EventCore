@@ -1,20 +1,21 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
 import dev.imabad.mceventsuite.core.EventCore;
+import dev.imabad.mceventsuite.core.api.actions.Action;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
 import dev.imabad.mceventsuite.core.modules.mysql.PropertyMapConverter;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
 import dev.imabad.mceventsuite.core.util.PropertyMap;
 
-import javax.annotation.Resource;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "players")
-public class EventPlayer {
+public abstract class EventPlayer {
 
     private static PropertyMap defaultProperties = new PropertyMap();
 
@@ -49,11 +50,11 @@ public class EventPlayer {
     @Id
     @Column(name="uuid", unique = true, nullable = false)
     @org.hibernate.annotations.Type(type="uuid-char")
-    public UUID getUuid() {
+    public UUID getUUID() {
         return uuid;
     }
 
-    public void setUuid(UUID uuid) {
+    public void setUUID(UUID uuid) {
         this.uuid = uuid;
     }
 
@@ -100,7 +101,19 @@ public class EventPlayer {
     }
 
     public boolean hasPermission(String permission){
-        return this.permissions == null ? rank.getPermissions().contains(permission) : (this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission)));
+        boolean hasPerm = this.permissions == null ? rank.hasPermission(permission) : (this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission)));
+        if(!hasPerm && rank.isInheritsFromBelow()){
+            for(EventRank eventRank : EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(RankDAO.class).getRanks()){
+                if(eventRank.getPower() < rank.getPower() && rank.hasPermission(permission)){
+                    return true;
+                }
+            }
+        }
+        return hasPerm;
+    }
+
+    public boolean playerHasPermission(String permission){
+        return this.permissions != null && (this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission)));
     }
 
     @Column(name="properties")
@@ -163,5 +176,22 @@ public class EventPlayer {
             this.properties = new PropertyMap();
         }
         this.properties.put(name, value);
+    }
+
+    public abstract void sendMessage(String message);
+
+    public abstract void executeAction(Action action);
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EventPlayer that = (EventPlayer) o;
+        return uuid.equals(that.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uuid);
     }
 }

@@ -1,5 +1,6 @@
 package dev.imabad.mceventsuite.core.modules.mysql.dao;
 
+import dev.imabad.mceventsuite.core.BaseEventPlayer;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
 import org.hibernate.Session;
@@ -32,7 +33,7 @@ public class PlayerDAO extends DAO {
             if (eventPlayer == null) {
                 eventPlayer = getPlayer(username);
                 if (eventPlayer == null) {
-                    eventPlayer = new EventPlayer(uuid, username);
+                    eventPlayer = new BaseEventPlayer(uuid, username);
                     savePlayer(eventPlayer);
                 }
             }
