@@ -20,11 +20,25 @@ public class MySQLModule extends Module implements IConfigProvider<MySQLConfig> 
 
     @Override
     public void onEnable() {
+        if (this.mySQLConfig.getHostname().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "The required property 'hostname' is missing from the connection config.\n");
+        }
+
+        if (this.mySQLConfig.getDatabase().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "The required property 'database' is missing from the connection config.\n");
+        }
+
+        if (this.mySQLConfig.getUsername().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "The required property 'username' is missing from the connection config.\n");
+        }
+
         this.mySQLDatabase = new MySQLDatabase(this.mySQLConfig);
         databaseThread = new Thread(mySQLDatabase::connect);
         databaseThread.setContextClassLoader(getClass().getClassLoader());
         databaseThread.start();
-        this.setEnabled(true);
     }
 
     @Override
@@ -33,7 +47,6 @@ public class MySQLModule extends Module implements IConfigProvider<MySQLConfig> 
             this.mySQLDatabase.disconnect();
         if(databaseThread != null && databaseThread.isAlive())
             databaseThread.stop();
-        this.setEnabled(false);
     }
 
     @Override
