@@ -42,7 +42,7 @@ public class AccessControlSetting {
         return id;
     }
 
-    @OneToMany
+    @OneToOne
     @JoinColumn(name="rank_id", referencedColumnName = "id")
     public EventRank getRank() {
         return rank;

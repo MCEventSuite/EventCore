@@ -11,9 +11,7 @@ public class EventBooth {
     private String id;
     private String name;
     private String boothType;
-    @OneToOne
     private EventPlayer owner;
-    @ManyToMany
     private List<EventPlayer> members;
     private String plotID;
     private String status = "un-assigned";
@@ -53,6 +51,7 @@ public class EventBooth {
         this.boothType = boothType;
     }
 
+    @OneToOne(fetch = FetchType.EAGER)
     public EventPlayer getOwner() {
         return owner;
     }
@@ -61,6 +60,7 @@ public class EventBooth {
         this.owner = owner;
     }
 
+    @ManyToMany(fetch = FetchType.EAGER)
     public List<EventPlayer> getMembers() {
         return members;
     }

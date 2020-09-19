@@ -65,7 +65,7 @@ public class EventRank {
         return suffix;
     }
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     public List<String> getPermissions() {
         return permissions;
     }

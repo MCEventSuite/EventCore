@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "players")
-public abstract class EventPlayer {
+public class EventPlayer {
 
     private static PropertyMap defaultProperties = new PropertyMap();
 
@@ -178,14 +178,12 @@ public abstract class EventPlayer {
         this.properties.put(name, value);
     }
 
-    public abstract void sendMessage(String message);
 
-    public abstract void executeAction(Action action);
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof EventPlayer)) return false;
         EventPlayer that = (EventPlayer) o;
         return uuid.equals(that.uuid);
     }

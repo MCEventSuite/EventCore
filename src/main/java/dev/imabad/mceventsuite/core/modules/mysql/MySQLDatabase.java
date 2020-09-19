@@ -8,6 +8,7 @@ import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import dev.imabad.mceventsuite.core.api.objects.EventRank;
 import dev.imabad.mceventsuite.core.api.objects.EventSetting;
 import dev.imabad.mceventsuite.core.config.database.MySQLConfig;
+import dev.imabad.mceventsuite.core.modules.ac.db.AccessControlSetting;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.*;
 import dev.imabad.mceventsuite.core.modules.mysql.events.MySQLLoadedEvent;
 import org.hibernate.Session;
@@ -66,7 +67,7 @@ public class MySQLDatabase extends DatabaseProvider {
         prop.setProperty("hibernate.connection.url", connectionString);
 
         //You can use any database you want, I had it configured for Postgres
-        prop.setProperty("hibernate.dialect", "org.hibernate.dialect.MariaDB53Dialect");
+        prop.setProperty("hibernate.dialect", "org.hibernate.dialect.MariaDB103Dialect");
 
         prop.setProperty("hibernate.connection.username", mySQLConfig.getUsername());
 
@@ -75,28 +76,19 @@ public class MySQLDatabase extends DatabaseProvider {
         }
 
         prop.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
+        prop.setProperty("hibernate.globally_quoted_identifiers", "true");
         prop.setProperty("hibernate.hbm2ddl.auto", "update");
         prop.setProperty("show_sql", "true");
+        prop.setProperty("format_sql", "true");
         configuration = new Configuration().addProperties(prop);
         configuration.addAnnotatedClass(EventSetting.class);
         configuration.addAnnotatedClass(EventPlayer.class);
         configuration.addAnnotatedClass(EventRank.class);
         configuration.addAnnotatedClass(EventBooth.class);
+        configuration.addAnnotatedClass(AccessControlSetting.class);
         configuration.addPackage("dev.imabad.mceventsuite");
         sessionFactory = configuration.buildSessionFactory();
         EventCore.getInstance().getEventRegistry().handleEvent(new MySQLLoadedEvent(this));
-    }
-
-    public void registerEntity(Class clazz){
-        if(configuration == null){
-            return;
-        }
-        if(Arrays.stream(clazz.getAnnotations()).noneMatch(annotation -> annotation instanceof Entity)){
-            return;
-        }
-        configuration.addAnnotatedClass(clazz);
-        sessionFactory.close();
-        sessionFactory = configuration.buildSessionFactory();
     }
 
     public void registerDAOs(DAO... daos){

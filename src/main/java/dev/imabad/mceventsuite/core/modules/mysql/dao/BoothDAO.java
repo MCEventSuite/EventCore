@@ -30,7 +30,7 @@ public class BoothDAO extends DAO {
 
     public List<EventBooth> getPlayerBooths(EventPlayer player){
         try(Session session = mySQLDatabase.getSession()){
-            Query<EventBooth> boothQuery = session.createQuery("select r from EventBooth r where :player MEMBER OF r.members", EventBooth.class);
+            Query<EventBooth> boothQuery = session.createQuery("select r from EventBooth r where :player MEMBER OF r.members OR r.owner = :player", EventBooth.class);
             boothQuery.setParameter("player", player);
             return boothQuery.getResultList();
         }

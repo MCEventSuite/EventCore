@@ -1,6 +1,5 @@
 package dev.imabad.mceventsuite.core.modules.mysql.dao;
 
-import dev.imabad.mceventsuite.core.BaseEventPlayer;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
 import org.hibernate.Session;
@@ -8,7 +7,6 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import javax.persistence.NoResultException;
-import java.sql.*;
 import java.util.UUID;
 
 public class PlayerDAO extends DAO {
@@ -33,7 +31,7 @@ public class PlayerDAO extends DAO {
             if (eventPlayer == null) {
                 eventPlayer = getPlayer(username);
                 if (eventPlayer == null) {
-                    eventPlayer = new BaseEventPlayer(uuid, username);
+                    eventPlayer = new EventPlayer(uuid, username);
                     savePlayer(eventPlayer);
                 }
             }
@@ -80,16 +78,34 @@ public class PlayerDAO extends DAO {
      * @param player - The EventPlayer you wish to save
      */
     @Deprecated
-    public void savePlayer(EventPlayer player){
-        Transaction tx = null;
+    public void saveOrUpdatePlayer(EventPlayer player){
         try (Session session = mySQLDatabase.getSession()) {
-            tx = session.beginTransaction();
             session.saveOrUpdate(player);
-            tx.commit();
         } catch (RuntimeException e) {
-            assert tx != null;
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Saves an EventPlayer to the database
+     * You should avoid this where possible and ask the central service to do this for you
+     * @param player - The EventPlayer you wish to save
+     */
+    @Deprecated
+    public void savePlayer(EventPlayer player){
+        Session session = mySQLDatabase.getSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.save(player);
+            tx.commit(); // Flush happens automatically
+        }
+        catch (RuntimeException e) {
             tx.rollback();
             e.printStackTrace();
+        }
+        finally {
+            session.close();
         }
     }
 }

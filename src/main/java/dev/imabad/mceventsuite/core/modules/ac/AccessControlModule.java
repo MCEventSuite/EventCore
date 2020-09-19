@@ -28,7 +28,7 @@ public class AccessControlModule extends Module {
     public void onEnable() {
         MySQLDatabase mySQLDatabase = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase();
         EventCore.getInstance().getEventRegistry().registerListener(MySQLLoadedEvent.class, mySQLLoadedEvent -> {
-            mySQLDatabase.registerEntity(AccessControlSetting.class);
+//            mySQLDatabase.registerEntity(AccessControlSetting.class);
             mySQLDatabase.registerDAOs(new AccessControlDAO(mySQLDatabase));
             accessControlSettings = mySQLDatabase.getDAO(AccessControlDAO.class).getAccessControlSettings();
         });

@@ -3,7 +3,6 @@ package dev.imabad.mceventsuite.core;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import dev.imabad.mceventsuite.core.api.objects.EventRank;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
-import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.PlayerDAO;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
 import dev.imabad.mceventsuite.core.modules.mysql.events.MySQLLoadedEvent;
@@ -28,7 +27,7 @@ public class EventCoreMain {
             System.out.println("Rank: " + eventPlayer.getRank().getName());
             System.out.println("Coins: " + eventPlayer.getIntProperty("coins"));
             eventPlayer.setProperty("coins", eventPlayer.getIntProperty("coins") + 5);
-            mySQLDatabase.getDAO(PlayerDAO.class).savePlayer(eventPlayer);
+            mySQLDatabase.getDAO(PlayerDAO.class).saveOrUpdatePlayer(eventPlayer);
         });
         Thread.sleep(1000 * 10);
         EventCore.getInstance().shutdown();
