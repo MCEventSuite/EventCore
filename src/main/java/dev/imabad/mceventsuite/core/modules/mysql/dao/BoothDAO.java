@@ -36,6 +36,17 @@ public class BoothDAO extends DAO {
         }
     }
 
+    public EventBooth getBoothFromPlotID(String type, String plotID){
+        try(Session session = mySQLDatabase.getSession()){
+            Query<EventBooth> boothQuery = session.createQuery("select r from EventBooth r where r.boothType = :type and r.plotID = :plotID", EventBooth.class);
+            boothQuery.setParameter("type", type);
+            boothQuery.setParameter("plotID", plotID);
+            return boothQuery.getSingleResult();
+        }catch(Exception e){
+            return null;
+        }
+    }
+
     public void saveBooth(EventBooth booth){
         Transaction tx = null;
         try (Session session = mySQLDatabase.getSession()) {

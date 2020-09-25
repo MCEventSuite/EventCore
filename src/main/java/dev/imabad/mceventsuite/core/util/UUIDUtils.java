@@ -14,7 +14,12 @@ import java.util.UUID;
 public class UUIDUtils {
 
     public static String insertDashUUID(String uuid) {
-        return String.format("%1$-%2$-%3$-%4$", uuid.substring(0,7), uuid.substring(7,11), uuid.substring(11,15), uuid.substring(15,20));
+        StringBuffer idBuff = new StringBuffer(uuid);
+        idBuff.insert(20, '-');
+        idBuff.insert(16, '-');
+        idBuff.insert(12, '-');
+        idBuff.insert(8, '-');
+        return idBuff.toString();
     }
 
 
@@ -23,6 +28,7 @@ public class UUIDUtils {
             URL url = new URL("https://api.mymcuu.id/username/" + username);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
+            con.setRequestProperty("User-Agent", "Cubed2020");
             int status = con.getResponseCode();
             if(status != 200){
                 return null;
@@ -35,10 +41,6 @@ public class UUIDUtils {
             }
             in.close();
             con.disconnect();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (ProtocolException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

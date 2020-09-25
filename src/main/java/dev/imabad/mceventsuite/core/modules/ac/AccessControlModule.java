@@ -2,14 +2,18 @@ package dev.imabad.mceventsuite.core.modules.ac;
 
 import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.modules.Module;
+import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import dev.imabad.mceventsuite.core.api.objects.EventRank;
 import dev.imabad.mceventsuite.core.modules.ac.db.AccessControlDAO;
 import dev.imabad.mceventsuite.core.modules.ac.db.AccessControlSetting;
+import dev.imabad.mceventsuite.core.modules.ac.db.PlayerBan;
+import dev.imabad.mceventsuite.core.modules.ac.db.PlayerBanDAO;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
 import dev.imabad.mceventsuite.core.modules.mysql.events.MySQLLoadedEvent;
 import dev.imabad.mceventsuite.core.modules.redis.RedisMessageListener;
 import dev.imabad.mceventsuite.core.modules.redis.RedisModule;
+import dev.imabad.mceventsuite.core.util.TimeUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +21,7 @@ import java.util.Optional;
 
 public class AccessControlModule extends Module {
 
+    private MySQLDatabase mySQLDatabase;
     private List<AccessControlSetting> accessControlSettings;
 
     @Override
@@ -26,10 +31,10 @@ public class AccessControlModule extends Module {
 
     @Override
     public void onEnable() {
-        MySQLDatabase mySQLDatabase = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase();
+        mySQLDatabase = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase();
         EventCore.getInstance().getEventRegistry().registerListener(MySQLLoadedEvent.class, mySQLLoadedEvent -> {
 //            mySQLDatabase.registerEntity(AccessControlSetting.class);
-            mySQLDatabase.registerDAOs(new AccessControlDAO(mySQLDatabase));
+            mySQLDatabase.registerDAOs(new AccessControlDAO(mySQLDatabase), new PlayerBanDAO(mySQLDatabase));
             accessControlSettings = mySQLDatabase.getDAO(AccessControlDAO.class).getAccessControlSettings();
         });
         EventCore.getInstance().getModuleRegistry().getModule(RedisModule.class).registerListener(RefreshAccessControlListMessage.class, new RedisMessageListener<>(refreshAccessControlListMessage -> {
@@ -65,5 +70,21 @@ public class AccessControlModule extends Module {
             return AccessControlResponse.DENIED;
         }
         return AccessControlResponse.ALLOWED;
+    }
+
+    public PlayerBan getActivePlayerBan(EventPlayer player){
+        return mySQLDatabase.getDAO(PlayerBanDAO.class).getPlayerActiveBan(player);
+    }
+
+    public AccessControlResponse checkIfAllowed(EventPlayer eventPlayer){
+        AccessControlResponse rankResponse = checkIfAllowed(eventPlayer.getRank());
+        if(rankResponse.isAllowed()){
+            PlayerBan playerBan = getActivePlayerBan(eventPlayer);
+            if(playerBan != null){
+                return new AccessControlResponse(false, playerBan.kickMessage());
+            }
+            return AccessControlResponse.ALLOWED;
+        }
+        return rankResponse;
     }
 }

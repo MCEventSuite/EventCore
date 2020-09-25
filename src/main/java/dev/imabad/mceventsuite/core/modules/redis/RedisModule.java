@@ -5,11 +5,13 @@ import dev.imabad.mceventsuite.core.api.IConfigProvider;
 import dev.imabad.mceventsuite.core.api.modules.Module;
 import dev.imabad.mceventsuite.core.config.database.RedisConfig;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.params.SetParams;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class RedisModule extends Module implements IConfigProvider<RedisConfig> {
 
@@ -103,6 +105,30 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
         }
         try(Jedis jedis = redisConnection.getConnection()) {
             jedis.publish(channel.name(), messageJSON);
+        }
+    }
+
+    public void storeData(String key, String value){
+        try(Jedis jedis = redisConnection.getConnection()){
+            jedis.set(key, value);
+        }
+    }
+
+    public void storeData(String key, String value, int expires, TimeUnit timeUnit){
+        try(Jedis jedis = redisConnection.getConnection()){
+            jedis.set(key, value, SetParams.setParams().ex((int)timeUnit.toSeconds(expires)));
+        }
+    }
+
+    public String getData(String key){
+        try(Jedis jedis = redisConnection.getConnection()){
+            return jedis.get(key);
+        }
+    }
+
+    public void removeData(String key){
+        try(Jedis jedis = redisConnection.getConnection()){
+            jedis.del(key);
         }
     }
 }

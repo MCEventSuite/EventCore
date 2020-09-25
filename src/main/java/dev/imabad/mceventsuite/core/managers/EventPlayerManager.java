@@ -2,9 +2,7 @@ package dev.imabad.mceventsuite.core.managers;
 
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class EventPlayerManager {
 
@@ -21,5 +19,11 @@ public class EventPlayerManager {
     public Optional<EventPlayer> getPlayer(UUID uuid){
         return Optional.ofNullable(players.get(uuid));
     }
+
+    public Collection<EventPlayer> getPlayers(){
+        return players.values();
+    }
+
+    public boolean hasPlayer(UUID uuid) {return players.containsKey(uuid);}
 
 }

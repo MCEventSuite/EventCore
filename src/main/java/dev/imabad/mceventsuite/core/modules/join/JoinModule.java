@@ -21,7 +21,7 @@ public class JoinModule extends Module {
 
     @Override
     public void onEnable() {
-        EventCore.getInstance().getEventRegistry().registerListener(JoinEvent.class, this::handleJoinEvent);
+//        EventCore.getInstance().getEventRegistry().registerListener(JoinEvent.class, this::handleJoinEvent);
     }
 
     @Override

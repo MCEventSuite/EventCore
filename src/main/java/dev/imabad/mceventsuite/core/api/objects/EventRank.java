@@ -57,11 +57,17 @@ public class EventRank {
 
     @Column(name = "prefix")
     public String getPrefix() {
+        if(prefix == null){
+            return "";
+        }
         return prefix;
     }
 
     @Column(name = "suffix")
     public String getSuffix() {
+        if(suffix == null){
+            return "";
+        }
         return suffix;
     }
 
@@ -103,7 +109,30 @@ public class EventRank {
         this.inheritsFromBelow = inheritsFromBelow;
     }
 
-    public boolean hasPermission(String permission){
+    private boolean containsPermission(String permission){
         return this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission));
+    }
+
+    public boolean hasPermission(String permission){
+        if(containsPermission("*")){
+            return true;
+        }
+        String[] parts = permission.split("\\.");
+        StringBuilder fullPerm = new StringBuilder();
+        for(int i = 0; i < parts.length - 1; i++){
+            String part = parts[i];
+            if(i > 0){
+                fullPerm.append(".");
+            }
+            fullPerm.append(part);
+            if(containsPermission(fullPerm + ".*")){
+              return true;
+            }
+        }
+        return containsPermission(permission);
+    }
+
+    public String nameEnum(){
+        return this.name.replace(" ",  "_").toUpperCase();
     }
 }

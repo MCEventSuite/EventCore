@@ -26,17 +26,15 @@ public class PlayerDAO extends DAO {
      * @see             EventPlayer
      */
     public EventPlayer getOrCreatePlayer(UUID uuid, String username){
-        try (Session session = mySQLDatabase.getSession()) {
-            EventPlayer eventPlayer = session.get(EventPlayer.class, uuid);
+        EventPlayer eventPlayer = getPlayer(uuid);
+        if (eventPlayer == null) {
+            eventPlayer = getPlayer(username);
             if (eventPlayer == null) {
-                eventPlayer = getPlayer(username);
-                if (eventPlayer == null) {
-                    eventPlayer = new EventPlayer(uuid, username);
-                    savePlayer(eventPlayer);
-                }
+                eventPlayer = new EventPlayer(uuid, username);
+                savePlayer(eventPlayer);
             }
-            return eventPlayer;
         }
+        return eventPlayer;
     }
 
     /**
@@ -49,7 +47,13 @@ public class PlayerDAO extends DAO {
      */
     public EventPlayer getPlayer(UUID uuid){
         try (Session session = mySQLDatabase.getSession()) {
-            return session.get(EventPlayer.class, uuid);
+            Query<EventPlayer> q= session.createQuery("select p FROM EventPlayer p LEFT JOIN FETCH p.permissions e WHERE p.UUID = :uuid", EventPlayer.class);
+            q.setParameter("uuid", uuid);
+            try {
+                return q.getSingleResult();
+            } catch (NoResultException e) {
+                return null;
+            }
         }
     }
 
@@ -63,10 +67,14 @@ public class PlayerDAO extends DAO {
      */
     public EventPlayer getPlayer(String username){
         try(Session session = mySQLDatabase.getSession()) {
-            Query<EventPlayer> q = session.createQuery("select p FROM EventPlayer p WHERE p.lastUsername = :username", EventPlayer.class).setParameter("username", username);
+            System.out.println("Checking for player with username: " + username);
+            Query<EventPlayer> q = session.createQuery("select p FROM EventPlayer p LEFT JOIN FETCH p.permissions e WHERE p.lastUsername = :username",
+                    EventPlayer.class);
+            q.setParameter("username", username);
             try {
                 return q.getSingleResult();
             } catch (NoResultException e) {
+                e.printStackTrace();
                 return null;
             }
         }
@@ -79,10 +87,14 @@ public class PlayerDAO extends DAO {
      */
     @Deprecated
     public void saveOrUpdatePlayer(EventPlayer player){
+        Transaction tx = null;
         try (Session session = mySQLDatabase.getSession()) {
+            tx = session.beginTransaction();
             session.saveOrUpdate(player);
+            tx.commit(); // Flush happens automatically
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            assert tx != null;
+            tx.rollback();
         }
     }
 

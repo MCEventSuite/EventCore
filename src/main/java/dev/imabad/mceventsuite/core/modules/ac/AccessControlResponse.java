@@ -10,6 +10,7 @@ public class AccessControlResponse {
 
     public AccessControlResponse(boolean allowed) {
         this.allowed = allowed;
+        this.denyReason = "You cannot access this at this time";
     }
 
     public AccessControlResponse(boolean allowed, String denyReason) {
