@@ -110,7 +110,7 @@ public class EventPlayer {
         }
         if(!hasPerm && rank.isInheritsFromBelow()){
             for(EventRank eventRank : EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(RankDAO.class).getRanks()){
-                if(eventRank.getPower() <= rank.getPower() && rank.hasPermission(permission)){
+                if(eventRank.getPower() <= rank.getPower() && eventRank.hasPermission(permission)){
                     return true;
                 }
             }
