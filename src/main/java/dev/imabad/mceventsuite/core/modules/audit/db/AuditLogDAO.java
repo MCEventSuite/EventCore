@@ -1,0 +1,35 @@
+package dev.imabad.mceventsuite.core.modules.audit.db;
+
+import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
+import dev.imabad.mceventsuite.core.modules.ac.db.PlayerBan;
+import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
+import dev.imabad.mceventsuite.core.modules.mysql.dao.DAO;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
+import java.util.List;
+
+public class AuditLogDAO extends DAO {
+
+    public AuditLogDAO(MySQLDatabase mySQLDatabase) {
+        super(mySQLDatabase);
+    }
+
+    public void saveAuditLog(AuditLogEntry auditLogEntry){
+        Session session = mySQLDatabase.getSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.save(auditLogEntry);
+            tx.commit(); // Flush happens automatically
+        }
+        catch (RuntimeException e) {
+            tx.rollback();
+            e.printStackTrace();
+        }
+        finally {
+            session.close();
+        }
+    }
+}
