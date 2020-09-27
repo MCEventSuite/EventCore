@@ -7,6 +7,8 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import javax.persistence.NoResultException;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class PlayerDAO extends DAO {
@@ -15,6 +17,21 @@ public class PlayerDAO extends DAO {
         super(mySQLDatabase);
     }
 
+    /**
+     * Get all players
+     * @return  A list of players
+     * @see     EventPlayer
+     */
+    public List<EventPlayer> getPlayers(){
+        try (Session session = mySQLDatabase.getSession()) {
+            Query<EventPlayer> q= session.createQuery("select p FROM EventPlayer p LEFT JOIN FETCH p.permissions e", EventPlayer.class);
+            try {
+                return q.getResultList();
+            } catch (NoResultException e) {
+                return Collections.emptyList();
+            }
+        }
+    }
 
     /**
      * Get or create a player using a UUID or username

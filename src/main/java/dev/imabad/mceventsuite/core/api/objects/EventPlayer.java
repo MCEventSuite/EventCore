@@ -122,7 +122,7 @@ public class EventPlayer {
         if(containsPermission("*")){
             return true;
         }
-        String[] parts = permission.split("\\.");
+        String[] parts = permission.split(".");
         StringBuilder fullPerm = new StringBuilder();
         for(int i = 0; i < parts.length - 1; i++){
             String part = parts[i];

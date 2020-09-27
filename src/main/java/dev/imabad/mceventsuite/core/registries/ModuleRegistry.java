@@ -112,6 +112,9 @@ public class ModuleRegistry implements IRegistry {
         unloadModule(module);
     }
 
+    public <T extends Module> boolean isModuleEnabled(Class<T> moduleClass){
+        return modules.containsKey(moduleClass) && modules.get(moduleClass).isEnabled();
+    }
 
     @Override
     public String getName() {
