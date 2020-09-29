@@ -22,7 +22,7 @@ public class BoothDAO extends DAO {
     public List<EventBooth> getBooths(){
         Session session = mySQLDatabase.getSession();
         try {
-            return session.createQuery("select r from EventBooth r", EventBooth.class).list();
+            return session.createQuery("select r from EventBooth r LEFT JOIN FETCH r.owner.permissions e", EventBooth.class).list();
         } finally {
             session.close();
         }
