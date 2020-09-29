@@ -12,10 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class RankDAO extends DAO {
 
@@ -70,14 +67,13 @@ public class RankDAO extends DAO {
         }
     }
 
-    public EventRank getLowestRank(){
-        Session session = mySQLDatabase.getSession();
-        try {
-            return session.createQuery("select r FROM EventRank r order by r.power asc", EventRank.class).setMaxResults(1).getSingleResult();
-        }catch(NoResultException e){
-            return new EventRank(0, "Default", "", "", Collections.emptyList());
-        } finally {
-            session.close();
+    public Optional<EventRank> getLowestRank(){
+        if(ranks == null){
+            getRanks(true);
         }
+        if(ranks.size() < 1){
+            return Optional.of(new EventRank(0, "Default", "", "", Collections.emptyList()));
+        }
+        return ranks.stream().min(Comparator.comparingInt(EventRank::getPower));
     }
 }

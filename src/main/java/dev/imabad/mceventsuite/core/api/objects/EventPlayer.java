@@ -46,7 +46,7 @@ public class EventPlayer {
     public EventPlayer(UUID uuid, String username){
         this.uuid = uuid;
         this.lastUsername = username;
-        this.rank = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(RankDAO.class).getLowestRank();
+        this.rank = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(RankDAO.class).getLowestRank().get();
         this.properties = defaultProperties;
     }
 

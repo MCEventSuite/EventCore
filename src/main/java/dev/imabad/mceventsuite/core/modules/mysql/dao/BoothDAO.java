@@ -12,6 +12,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class BoothDAO extends DAO {
 
@@ -25,6 +26,14 @@ public class BoothDAO extends DAO {
             return session.createQuery("select r from EventBooth r LEFT JOIN FETCH r.owner.permissions e", EventBooth.class).list();
         } finally {
             session.close();
+        }
+    }
+
+    public EventBooth getBoothFromID(UUID uuid){
+        try(Session session = mySQLDatabase.getSession()){
+            Query<EventBooth> boothQuery = session.createQuery("select r from EventBooth r LEFT JOIN FETCH r.owner.permissions e where r.id = :uuid ", EventBooth.class);
+            boothQuery.setParameter("uuid", uuid.toString());
+            return boothQuery.getSingleResult();
         }
     }
 
