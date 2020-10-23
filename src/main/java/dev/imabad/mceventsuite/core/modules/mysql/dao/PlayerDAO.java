@@ -2,11 +2,12 @@ package dev.imabad.mceventsuite.core.modules.mysql.dao;
 
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
+import redis.clients.jedis.Transaction;
 
-import javax.persistence.NoResultException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -15,6 +16,17 @@ public class PlayerDAO extends DAO {
 
     public PlayerDAO(MySQLDatabase mySQLDatabase) {
         super(mySQLDatabase);
+
+    }
+
+    @Override
+    public void setup() {
+        try(Connection connection = mySQLDatabase.getConnection();
+            Statement statement = connection.createStatement();){
+            statement.executeUpdate("create table if not exists players ( uuid varchar(255) not null primary key, last_username varchar(255) null, properties varchar(255) null, rank_id int null, constraint FKdd8qslf7ue2b3neu4bojbosix foreign key (rank_id) references ranks (id) );");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -23,13 +35,17 @@ public class PlayerDAO extends DAO {
      * @see     EventPlayer
      */
     public List<EventPlayer> getPlayers(){
-        try (Session session = mySQLDatabase.getSession()) {
+        try (Connection connection = mySQLDatabase.getConnection();
+             Statement statement = connection.createStatement();) {
+            ResultSet resultSet = statement.executeQuery("select * FROM players;");
             Query<EventPlayer> q= session.createQuery("select p FROM EventPlayer p LEFT JOIN FETCH p.permissions e", EventPlayer.class);
             try {
                 return q.getResultList();
             } catch (NoResultException e) {
                 return Collections.emptyList();
             }
+        }catch(SQLException e){
+            return Collections.emptyList();
         }
     }
 
@@ -43,15 +59,19 @@ public class PlayerDAO extends DAO {
      * @see             EventPlayer
      */
     public EventPlayer getOrCreatePlayer(UUID uuid, String username){
-        EventPlayer eventPlayer = getPlayer(uuid);
-        if (eventPlayer == null) {
-            eventPlayer = getPlayer(username);
+        try {
+            EventPlayer eventPlayer = getPlayer(uuid);
             if (eventPlayer == null) {
-                eventPlayer = new EventPlayer(uuid, username);
-                savePlayer(eventPlayer);
+                eventPlayer = getPlayer(username);
+                if (eventPlayer == null) {
+                    eventPlayer = new EventPlayer(uuid, username);
+                    savePlayer(eventPlayer);
+                }
             }
+            return eventPlayer;
+        } catch(Exception e){
+            return null;
         }
-        return eventPlayer;
     }
 
     /**

@@ -7,17 +7,11 @@ import dev.imabad.mceventsuite.core.modules.mysql.PropertyMapConverter;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
 import dev.imabad.mceventsuite.core.util.PropertyMap;
 import jdk.nashorn.internal.runtime.Property;
-import org.hibernate.annotations.DynamicUpdate;
-
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Entity
-@Table(name = "players")
-@DynamicUpdate
 public class EventPlayer {
 
     private static PropertyMap defaultProperties = new PropertyMap();
@@ -26,7 +20,6 @@ public class EventPlayer {
         defaultProperties.put(name, defaultValue);
     }
 
-    @org.hibernate.annotations.Type(type="uuid-char")
     private UUID uuid;
     private String lastUsername;
     private EventRank rank;
@@ -50,9 +43,6 @@ public class EventPlayer {
         this.properties = defaultProperties;
     }
 
-    @Id
-    @Column(name="uuid", unique = true, nullable = false)
-    @org.hibernate.annotations.Type(type="uuid-char")
     public UUID getUUID() {
         return uuid;
     }
@@ -61,7 +51,6 @@ public class EventPlayer {
         this.uuid = uuid;
     }
 
-    @Column(name = "last_username")
     public String getLastUsername() {
         return lastUsername;
     }
@@ -70,8 +59,6 @@ public class EventPlayer {
         this.lastUsername = lastUsername;
     }
 
-    @OneToOne
-    @JoinColumn(name="rank_id", referencedColumnName = "id")
     public EventRank getRank() {
         return rank;
     }
@@ -80,7 +67,6 @@ public class EventPlayer {
         this.rank = rank;
     }
 
-    @ElementCollection
     public List<String> getPermissions() {
         return permissions;
     }
@@ -141,8 +127,6 @@ public class EventPlayer {
         return this.permissions != null && (this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission)));
     }
 
-    @Column(name="properties")
-    @Convert(converter = PropertyMapConverter.class)
     public PropertyMap getProperties() {
         return properties;
     }

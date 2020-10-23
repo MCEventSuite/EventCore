@@ -4,13 +4,7 @@ package dev.imabad.mceventsuite.core.api.objects;
 import com.google.gson.Gson;
 import dev.imabad.mceventsuite.core.util.GsonUtils;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
-@Entity
-@Table(name = "event_settings")
 public class EventSetting {
 
     private String name;
@@ -28,7 +22,6 @@ public class EventSetting {
     public EventSetting() {
     }
 
-    @Column(name = "group")
     public String getGroup() {
         return group;
     }
@@ -37,8 +30,6 @@ public class EventSetting {
         this.group = group;
     }
 
-    @Id
-    @Column(name = "name")
     public String getName() {
         return name;
     }
@@ -47,7 +38,6 @@ public class EventSetting {
         this.name = name;
     }
 
-    @Column(name = "value")
     private String getValue() {
         return value;
     }
@@ -60,7 +50,6 @@ public class EventSetting {
         this.value =  GsonUtils.getGson().toJson(value);
     }
 
-    @Column(name = "permission")
     public String getPermission() {
         return permission;
     }

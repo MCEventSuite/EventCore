@@ -14,11 +14,9 @@ repositories {
 }
 
 dependencies {
-    compile 'org.hibernate:hibernate-core:5.4.21.Final'
-    compile group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
-    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.2.4'
     compile 'redis.clients:jedis:3.2.0'
     runtime 'mysql:mysql-connector-java:5.1.37'
+    compile 'com.zaxxer:HikariCP:3.4.5'
     implementation 'com.google.code.gson:gson:2.8.5'
 
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.2')

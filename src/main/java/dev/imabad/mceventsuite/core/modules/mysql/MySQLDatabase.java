@@ -1,5 +1,6 @@
 package dev.imabad.mceventsuite.core.modules.mysql;
 
+import com.zaxxer.hikari.HikariDataSource;
 import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.database.DatabaseProvider;
 import dev.imabad.mceventsuite.core.api.database.DatabaseType;
@@ -19,6 +20,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 import javax.persistence.Entity;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Properties;
@@ -27,8 +30,7 @@ import java.util.Set;
 public class MySQLDatabase extends DatabaseProvider {
 
     private MySQLConfig mySQLConfig;
-    private SessionFactory sessionFactory;
-    private Configuration configuration;
+    private HikariDataSource dataSource;
 
     private Set<DAO> registeredDAOs;
 
@@ -45,7 +47,7 @@ public class MySQLDatabase extends DatabaseProvider {
 
     @Override
     public boolean isConnected() {
-        return !sessionFactory.isClosed();
+        return !dataSource.isClosed();
     }
 
     @Override
@@ -60,30 +62,17 @@ public class MySQLDatabase extends DatabaseProvider {
 
     @Override
     public void connect() {
-        Properties prop= new Properties();
-
         String connectionString = mySQLConfig.getPort() != 0
-            ? String.format("jdbc:mysql://%s:%d/%s", mySQLConfig.getHostname(), mySQLConfig.getPort(),
+                ? String.format("jdbc:mysql://%s:%d/%s", mySQLConfig.getHostname(), mySQLConfig.getPort(),
                 mySQLConfig.getDatabase())
-            : String.format("jdbc:mysql://%s/%s", mySQLConfig.getHostname(), mySQLConfig.getDatabase());
-
-        prop.setProperty("hibernate.connection.url", connectionString);
-
-        //You can use any database you want, I had it configured for Postgres
-        prop.setProperty("hibernate.dialect", "org.hibernate.dialect.MariaDB103Dialect");
-
-        prop.setProperty("hibernate.connection.username", mySQLConfig.getUsername());
-
-        if(mySQLConfig.getPassword().length() > 0) {
-            prop.setProperty("hibernate.connection.password", mySQLConfig.getPassword());
+                : String.format("jdbc:mysql://%s/%s", mySQLConfig.getHostname(), mySQLConfig.getDatabase());
+        dataSource = new HikariDataSource();
+        dataSource.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
+        dataSource.setJdbcUrl(connectionString);
+        dataSource.setUsername(mySQLConfig.getUsername());
+        if(mySQLConfig.getPassword().length() > 0){
+            dataSource.setPassword(mySQLConfig.getPassword());
         }
-
-        prop.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
-        prop.setProperty("hibernate.globally_quoted_identifiers", "true");
-        prop.setProperty("hibernate.hbm2ddl.auto", "update");
-        prop.setProperty("show_sql", "true");
-        prop.setProperty("format_sql", "true");
-        configuration = new Configuration().addProperties(prop);
         configuration.addAnnotatedClass(EventSetting.class);
         configuration.addAnnotatedClass(EventPlayer.class);
         configuration.addAnnotatedClass(EventRank.class);
@@ -92,8 +81,6 @@ public class MySQLDatabase extends DatabaseProvider {
         configuration.addAnnotatedClass(PlayerBan.class);
         configuration.addAnnotatedClass(AuditLogEntry.class);
         configuration.addAnnotatedClass(DiscordLink.class);
-        configuration.addPackage("dev.imabad.mceventsuite");
-        sessionFactory = configuration.buildSessionFactory();
         EventCore.getInstance().getEventRegistry().handleEvent(new MySQLLoadedEvent(this));
     }
 
@@ -107,11 +94,11 @@ public class MySQLDatabase extends DatabaseProvider {
 
     @Override
     public void disconnect() {
-        if(sessionFactory != null)
-            sessionFactory.close();
+        if(dataSource != null)
+            dataSource.close();
     }
 
-    public Session getSession(){
-        return sessionFactory.openSession();
+    public Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
     }
 }
