@@ -83,6 +83,13 @@ public class MySQLDatabase extends DatabaseProvider {
         prop.setProperty("hibernate.hbm2ddl.auto", "update");
         prop.setProperty("show_sql", "true");
         prop.setProperty("format_sql", "true");
+
+        // Start with just one connection (default is three)
+        prop.setProperty("hibernate.c3p0.min_size", "1");
+
+        // When the pool is exhausted, create one new connection (default is three)
+        prop.setProperty("hibernate.c3p0.acquire_increment", "1");
+
         configuration = new Configuration().addProperties(prop);
         configuration.addAnnotatedClass(EventSetting.class);
         configuration.addAnnotatedClass(EventPlayer.class);
