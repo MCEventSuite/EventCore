@@ -120,6 +120,12 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
         }
     }
 
+    public boolean existsData(String key){
+        try(Jedis jedis = redisConnection.getConnection()){
+            return jedis.exists(key);
+        }
+    }
+
     public String getData(String key){
         try(Jedis jedis = redisConnection.getConnection()){
             return jedis.get(key);
