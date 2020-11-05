@@ -1,6 +1,7 @@
 package dev.imabad.mceventsuite.core.modules.mysql.dao;
 
 import dev.imabad.mceventsuite.core.api.objects.EventBooth;
+import dev.imabad.mceventsuite.core.api.objects.EventBoothPlot;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import dev.imabad.mceventsuite.core.api.objects.EventRank;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
@@ -24,6 +25,15 @@ public class BoothDAO extends DAO {
         Session session = mySQLDatabase.getSession();
         try {
             return session.createQuery("select r from EventBooth r LEFT JOIN FETCH r.owner.permissions e", EventBooth.class).list();
+        } finally {
+            session.close();
+        }
+    }
+
+    public List<EventBoothPlot> getPlots(){
+        Session session = mySQLDatabase.getSession();
+        try {
+            return session.createQuery("select r from EventBoothPlot r LEFT JOIN FETCH r.booth b", EventBoothPlot.class).list();
         } finally {
             session.close();
         }
@@ -61,6 +71,18 @@ public class BoothDAO extends DAO {
         try (Session session = mySQLDatabase.getSession()) {
             tx = session.beginTransaction();
             session.saveOrUpdate(booth);
+            tx.commit();
+        } catch (RuntimeException e) {
+            assert tx != null;
+            tx.rollback();
+        }
+    }
+
+    public void saveBoothPlot(EventBoothPlot plot){
+        Transaction tx = null;
+        try (Session session = mySQLDatabase.getSession()) {
+            tx = session.beginTransaction();
+            session.saveOrUpdate(plot);
             tx.commit();
         } catch (RuntimeException e) {
             assert tx != null;
