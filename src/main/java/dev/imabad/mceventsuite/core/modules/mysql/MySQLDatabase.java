@@ -7,6 +7,7 @@ import dev.imabad.mceventsuite.core.api.objects.*;
 import dev.imabad.mceventsuite.core.config.database.MySQLConfig;
 import dev.imabad.mceventsuite.core.modules.ac.db.AccessControlSetting;
 import dev.imabad.mceventsuite.core.modules.ac.db.PlayerBan;
+import dev.imabad.mceventsuite.core.modules.announcements.db.ScheduledAnnouncement;
 import dev.imabad.mceventsuite.core.modules.audit.db.AuditLogEntry;
 import dev.imabad.mceventsuite.core.modules.discord.DiscordLink;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.*;
@@ -97,6 +98,7 @@ public class MySQLDatabase extends DatabaseProvider {
         configuration.addAnnotatedClass(AuditLogEntry.class);
         configuration.addAnnotatedClass(DiscordLink.class);
         configuration.addAnnotatedClass(EventBoothPlot.class);
+        configuration.addAnnotatedClass(ScheduledAnnouncement.class);
         configuration.addPackage("dev.imabad.mceventsuite");
         sessionFactory = configuration.buildSessionFactory();
         EventCore.getInstance().getEventRegistry().handleEvent(new MySQLLoadedEvent(this));
