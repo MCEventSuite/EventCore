@@ -94,6 +94,15 @@ public class EventBoothPlot {
         return 0;
     }
 
+    public boolean blocksIsInBooth(int x, int z){
+        String[] splits = getPosOne().split(",");
+        int xStart = Integer.parseInt(splits[0]);
+        int zStart = Integer.parseInt(splits[2]);
+        int xEnd = xStart + plotSize();
+        int zEnd = zStart + plotSize();
+        return x >= xStart && x <= xEnd && z >= zStart && z <= zEnd;
+    }
+
     public boolean blockInBooth(int x, int z){
         String[] splits = getPosOne().split(",");
         int xStart = Integer.parseInt(splits[0]);
