@@ -60,14 +60,16 @@ public class AccessControlModule extends Module {
         if(accessControlSettings.isEmpty()){
             return AccessControlResponse.DENIED;
         }
-        Optional<AccessControlSetting> optionalAccessControlSetting = accessControlSettings.stream().filter(accessControlSetting -> eventRank.getPower() >= accessControlSetting.getRank().getPower()).findFirst();
+        Optional<AccessControlSetting> optionalAccessControlSetting = accessControlSettings.stream().filter(accessControlSetting -> eventRank.getPower() <= accessControlSetting.getRank().getPower()).findFirst();
         if(optionalAccessControlSetting.isPresent()){
             AccessControlSetting accessControlSetting = optionalAccessControlSetting.get();
             if(accessControlSetting.getUnlockTime() > System.currentTimeMillis()){
                 return new AccessControlResponse(false, accessControlSetting.getDenyMessage());
+            } else if (accessControlSetting.getUnlockTime() == -1){
+                return new AccessControlResponse(false, accessControlSetting.getDenyMessage());
             }
         } else {
-            return AccessControlResponse.DENIED;
+            return AccessControlResponse.ALLOWED;
         }
         return AccessControlResponse.ALLOWED;
     }
