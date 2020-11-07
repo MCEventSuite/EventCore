@@ -13,6 +13,7 @@ public class EventRank {
     private String name;
     private String prefix;
     private String suffix;
+    private String chatColor = "&f";
     private List<String> permissions;
     private boolean inheritsFromBelow = true;
 
@@ -22,6 +23,7 @@ public class EventRank {
         this.name = name;
         this.prefix = prefix;
         this.suffix = suffix;
+        this.chatColor = "&f";
         this.permissions = permissions;
         this.inheritsFromBelow = inheritsFromBelow;
     }
@@ -81,6 +83,14 @@ public class EventRank {
         return inheritsFromBelow;
     }
 
+    @Column(name = "chatColor")
+    public String getChatColor() {
+        if(suffix == null){
+            return "";
+        }
+        return suffix;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -107,6 +117,10 @@ public class EventRank {
 
     public void setInheritsFromBelow(boolean inheritsFromBelow) {
         this.inheritsFromBelow = inheritsFromBelow;
+    }
+
+    public void setChatColor(String chatColor) {
+        this.chatColor = chatColor;
     }
 
     private boolean containsPermission(String permission){
