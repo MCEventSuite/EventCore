@@ -87,9 +87,13 @@ public class ModuleRegistry implements IRegistry {
                 ((IConfigProvider<?>) module).saveConfig();
             }
         }
-
-        module.onDisable();
-        module.setEnabled(false);
+        try {
+            module.onDisable();
+            module.setEnabled(false);
+        }catch(Exception e){
+            System.err.printf("[EventCore] Unable to disable module %s\n", module.getName());
+            e.printStackTrace();
+        }
     }
 
     public void enableModules(){
