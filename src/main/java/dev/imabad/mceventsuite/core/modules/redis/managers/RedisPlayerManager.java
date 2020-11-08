@@ -31,6 +31,9 @@ public class RedisPlayerManager {
         redisModule.removeFromHash(PLAYERS_KEY, username);
     }
 
+    public RedisPlayer getPlayer(String username){
+        return redisModule.getFromHash(PLAYERS_KEY, username, RedisPlayer.class);
+    }
 
     public boolean isOnline(String username){
         return redisModule.existsInHash(PLAYERS_KEY, username);
