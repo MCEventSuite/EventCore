@@ -4,6 +4,9 @@ import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.IConfigProvider;
 import dev.imabad.mceventsuite.core.api.modules.Module;
 import dev.imabad.mceventsuite.core.config.database.RedisConfig;
+import dev.imabad.mceventsuite.core.modules.redis.events.RedisConnectionEvent;
+import dev.imabad.mceventsuite.core.modules.redis.managers.MutedPlayersManager;
+import dev.imabad.mceventsuite.core.modules.redis.managers.RedisPlayerManager;
 import dev.imabad.mceventsuite.core.modules.redis.objects.RedisPlayer;
 import dev.imabad.mceventsuite.core.util.GsonUtils;
 import redis.clients.jedis.Jedis;
@@ -19,6 +22,8 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
     private RedisConnection redisConnection;
     private Thread redisThread;
     private HashMap<Class<? extends RedisBaseMessage>, List<RedisMessageListener>> registeredListeners = new HashMap<>();
+    private MutedPlayersManager mutedPlayersManager;
+    private RedisPlayerManager redisPlayerManager;
 
     @Override
     public Class<RedisConfig> getConfigType() {
@@ -61,6 +66,10 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
         redisThread = new Thread(redisConnection::connect);
         redisThread.start();
         this.setEnabled(true);
+        EventCore.getInstance().getEventRegistry().registerListener(RedisConnectionEvent.class, (event) -> {
+            mutedPlayersManager = new MutedPlayersManager(this);
+            redisPlayerManager =  new RedisPlayerManager(this);
+        });
     }
 
     @Override
@@ -138,65 +147,52 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
         }
     }
 
-    public int onlinePlayerCount(){
+    public int hashCount(String key){
         try(Jedis jedis = redisConnection.getConnection()){
-            return jedis.hlen("players").intValue();
+            return jedis.hlen(key).intValue();
         }
     }
 
-    public Set<RedisPlayer> getOnlinePlayers(){
+    public <T> Set<T> hashList(String key, Class<T> clazz){
         try(Jedis jedis = redisConnection.getConnection()){
-            Map<String, String> encodedPlayers = jedis.hgetAll("players");
-            return encodedPlayers.values().stream().map(s -> GsonUtils.getGson().fromJson(s, RedisPlayer.class)).collect(Collectors.toSet());
+            Map<String, String> encodedPlayers = jedis.hgetAll(key);
+            return encodedPlayers.values().stream().map(s -> GsonUtils.getGson().fromJson(s, clazz)).collect(Collectors.toSet());
         }
     }
 
-    public void addPlayer(RedisPlayer redisPlayer){
+    public void addToHash(String hashKey, String key, String value){
         try(Jedis jedis = redisConnection.getConnection()){
-            jedis.hsetnx("players", redisPlayer.getUsername(), GsonUtils.getGson().toJson(redisPlayer));
+            jedis.hsetnx(hashKey, key, value);
         }
     }
 
-    public void removePlayer(RedisPlayer redisPlayer){
+    public void addToHash(String hashKey, String key, Object value){
+        addToHash(hashKey, key, GsonUtils.getGson().toJson(value));
+    }
+
+    public void removeFromHash(String hashKey, String key){
         try(Jedis jedis = redisConnection.getConnection()){
-            jedis.hdel("players", redisPlayer.getUsername());
+            jedis.hdel(hashKey, key);
         }
     }
 
-    public boolean isPlayerOnline(String username){
+    public boolean existsInHash(String hashKey, String key){
         try(Jedis jedis = redisConnection.getConnection()){
-            return jedis.hexists("players", username);
+            return jedis.hexists(hashKey, key);
         }
     }
 
-    public RedisPlayer getPlayer(String username){
+    public <T> T getFromHash(String hashKey, String value, Class<T> clazz){
         try(Jedis jedis = redisConnection.getConnection()){
-            return GsonUtils.getGson().fromJson(jedis.hget("players", username), RedisPlayer.class);
+            return GsonUtils.getGson().fromJson(jedis.hget(hashKey, value), clazz);
         }
     }
 
-    public boolean isMuted(String uuid){
-        try(Jedis jedis = redisConnection.getConnection()){
-            return jedis.hexists("mutedPlayers", uuid);
-        }
+    public MutedPlayersManager getMutedPlayersManager() {
+        return mutedPlayersManager;
     }
 
-    public void addMute(String uuid, long expiry){
-        try(Jedis jedis = redisConnection.getConnection()){
-            jedis.hsetnx("mutedPlayers",uuid, Long.toString(expiry));
-        }
+    public RedisPlayerManager getRedisPlayerManager() {
+        return redisPlayerManager;
     }
-
-    public void removeMute(String uuid){
-        try(Jedis jedis = redisConnection.getConnection()){
-            jedis.hdel("mutedPlayers",uuid);
-        }
-    }
-
-    public long getMuteExpiry(String uuid){
-        try(Jedis jedis = redisConnection.getConnection()){
-            return Long.parseLong(jedis.hget("mutedPlayers",uuid));
-        }
-    }
-
 }
