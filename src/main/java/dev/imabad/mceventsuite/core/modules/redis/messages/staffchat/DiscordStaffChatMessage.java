@@ -1,4 +1,4 @@
-package dev.imabad.mceventsuite.core.modules.redis.messages;
+package dev.imabad.mceventsuite.core.modules.redis.messages.staffchat;
 
 import dev.imabad.mceventsuite.core.modules.redis.RedisBaseMessage;
 
