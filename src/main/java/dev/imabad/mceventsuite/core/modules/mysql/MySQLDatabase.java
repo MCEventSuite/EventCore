@@ -10,6 +10,8 @@ import dev.imabad.mceventsuite.core.modules.ac.db.PlayerBan;
 import dev.imabad.mceventsuite.core.modules.announcements.db.ScheduledAnnouncement;
 import dev.imabad.mceventsuite.core.modules.audit.db.AuditLogEntry;
 import dev.imabad.mceventsuite.core.modules.discord.DiscordLink;
+import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassPlayer;
+import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassReward;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.*;
 import dev.imabad.mceventsuite.core.modules.mysql.events.MySQLLoadedEvent;
 import org.hibernate.Session;
@@ -99,6 +101,8 @@ public class MySQLDatabase extends DatabaseProvider {
         configuration.addAnnotatedClass(DiscordLink.class);
         configuration.addAnnotatedClass(EventBoothPlot.class);
         configuration.addAnnotatedClass(ScheduledAnnouncement.class);
+        configuration.addAnnotatedClass(EventPassPlayer.class);
+        configuration.addAnnotatedClass(EventPassReward.class);
         configuration.addPackage("dev.imabad.mceventsuite");
         sessionFactory = configuration.buildSessionFactory();
         EventCore.getInstance().getEventRegistry().handleEvent(new MySQLLoadedEvent(this));

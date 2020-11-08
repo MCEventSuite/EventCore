@@ -16,6 +16,7 @@ public class EventRank {
     private String chatColor = "&f";
     private List<String> permissions;
     private boolean inheritsFromBelow = true;
+    private int initialEventPassXP = 0;
 
 
     public EventRank(int power, String name, String prefix, String suffix, List<String> permissions, boolean inheritsFromBelow) {
@@ -26,6 +27,7 @@ public class EventRank {
         this.chatColor = "&f";
         this.permissions = permissions;
         this.inheritsFromBelow = inheritsFromBelow;
+        this.initialEventPassXP = 0;
     }
 
     public EventRank(int power, String name, String prefix, String suffix, List<String> permissions) {
@@ -91,6 +93,11 @@ public class EventRank {
         return suffix;
     }
 
+    @Column(name = "initialXP")
+    public int getInitialEventPassXP() {
+        return initialEventPassXP;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -121,6 +128,10 @@ public class EventRank {
 
     public void setChatColor(String chatColor) {
         this.chatColor = chatColor;
+    }
+
+    public void setInitialEventPassXP(int initialEventPassXP) {
+        this.initialEventPassXP = initialEventPassXP;
     }
 
     private boolean containsPermission(String permission){

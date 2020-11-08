@@ -2,6 +2,7 @@ package dev.imabad.mceventsuite.core.api.objects;
 
 import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.actions.Action;
+import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassPlayer;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
 import dev.imabad.mceventsuite.core.modules.mysql.PropertyMapConverter;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
