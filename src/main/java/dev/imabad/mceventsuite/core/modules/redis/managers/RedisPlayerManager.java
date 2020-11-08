@@ -5,14 +5,12 @@ import dev.imabad.mceventsuite.core.modules.redis.objects.RedisPlayer;
 
 import java.util.Set;
 
-public class RedisPlayerManager {
+public class RedisPlayerManager extends BaseRedisManager{
 
     private static final String PLAYERS_KEY = "players";
 
-    private RedisModule redisModule;
-
     public RedisPlayerManager(RedisModule redisModule){
-        this.redisModule = redisModule;
+        super(redisModule);
     }
 
     public int playerCount(){

@@ -2,14 +2,11 @@ package dev.imabad.mceventsuite.core.modules.redis.managers;
 
 import dev.imabad.mceventsuite.core.modules.redis.RedisModule;
 
-public class MutedPlayersManager {
+public class MutedPlayersManager extends BaseRedisManager{
 
     private static final String MUTED_KEY = "mutedPlayers";
-
-    private final RedisModule redisModule;
-
     public MutedPlayersManager(RedisModule redisModule){
-        this.redisModule = redisModule;
+        super(redisModule);
     }
 
     public int mutedCount(){
