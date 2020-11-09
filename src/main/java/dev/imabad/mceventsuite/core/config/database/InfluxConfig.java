@@ -8,6 +8,7 @@ public class InfluxConfig extends BaseConfig {
     private String url;
     private String org;
     private String bucket;
+    private String token;
 
     @Override
     public String getName() {
@@ -24,5 +25,9 @@ public class InfluxConfig extends BaseConfig {
 
     public String getBucket() {
         return bucket;
+    }
+
+    public String getToken() {
+        return token;
     }
 }

@@ -7,6 +7,7 @@ import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
 import dev.imabad.mceventsuite.core.modules.mysql.PropertyMapConverter;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
 import dev.imabad.mceventsuite.core.util.PropertyMap;
+import java.io.Serializable;
 import jdk.nashorn.internal.runtime.Property;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -19,7 +20,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "players")
 @DynamicUpdate
-public class EventPlayer {
+public class EventPlayer implements Serializable {
 
     private static PropertyMap defaultProperties = new PropertyMap();
 

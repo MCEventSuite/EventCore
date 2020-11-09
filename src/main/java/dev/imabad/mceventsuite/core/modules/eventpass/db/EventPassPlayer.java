@@ -2,13 +2,18 @@ package dev.imabad.mceventsuite.core.modules.eventpass.db;
 
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 
+import java.io.Serializable;
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "eventpass_players")
-public class EventPassPlayer {
+public class EventPassPlayer implements Serializable {
 
     private EventPlayer player;
     private int xp;
@@ -21,6 +26,8 @@ public class EventPassPlayer {
     }
 
     @Id
+    @OneToOne
+    @JoinColumn(name="player", referencedColumnName = "uuid")
     public EventPlayer getPlayer() {
         return player;
     }
@@ -57,4 +64,20 @@ public class EventPassPlayer {
         return false;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        EventPassPlayer that = (EventPassPlayer) o;
+        return player.equals(that.player);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(player);
+    }
 }

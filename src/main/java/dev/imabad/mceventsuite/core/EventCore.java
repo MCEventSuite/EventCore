@@ -1,6 +1,8 @@
 package dev.imabad.mceventsuite.core;
 
+import dev.imabad.mceventsuite.core.api.IConfigProvider;
 import dev.imabad.mceventsuite.core.api.actions.IActionExecutor;
+import dev.imabad.mceventsuite.core.config.CoreConfig;
 import dev.imabad.mceventsuite.core.config.EventSettings;
 import dev.imabad.mceventsuite.core.events.CoreShutdownEvent;
 import dev.imabad.mceventsuite.core.managers.EventPlayerManager;
@@ -12,7 +14,7 @@ import dev.imabad.mceventsuite.core.util.ConfigLoader;
 
 import java.io.File;
 
-public class EventCore {
+public class EventCore implements IConfigProvider<CoreConfig> {
 
     private static EventCore instance;
 
@@ -24,6 +26,8 @@ public class EventCore {
     private ModuleRegistry moduleRegistry;
     private EventRegistry eventRegistry;
 
+    private CoreConfig config;
+
     private EventPlayerManager eventPlayerManager;
 
     private IActionExecutor actionExecutor;
@@ -33,12 +37,8 @@ public class EventCore {
 
     public EventCore(File configFolder){
         instance = this;
-        if(System.getenv("CORE_ID") != null) {
-            identifier = System.getenv("CORE_ID");
-        } else {
-            identifier = "unknown";
-        }
         configLoader = new ConfigLoader(configFolder);
+        configLoader.getOrLoadConfig(this);
         eventRegistry = new EventRegistry();
         eventRegistry.registerListener(MySQLLoadedEvent.class, (event) -> {
             eventSettings = new EventSettings();
@@ -84,5 +84,36 @@ public class EventCore {
 
     public String getIdentifier() {
         return identifier;
+    }
+
+    @Override
+    public Class<CoreConfig> getConfigType() {
+        return CoreConfig.class;
+    }
+
+    @Override
+    public CoreConfig getConfig() {
+        return config;
+    }
+
+    @Override
+    public String getFileName() {
+        return "core.json";
+    }
+
+    @Override
+    public void loadConfig(CoreConfig config) {
+        this.config = config;
+        this.identifier = config.getIdentifier();
+    }
+
+    @Override
+    public void saveConfig() {
+
+    }
+
+    @Override
+    public boolean saveOnQuit() {
+        return false;
     }
 }

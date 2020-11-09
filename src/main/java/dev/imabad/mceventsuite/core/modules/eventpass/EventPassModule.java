@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class EventPassModule extends Module {
 
     public static Component xpGiven(int amount){
-        return Component.text(amount).color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD).append(Component.text("XP earnt!").color(NamedTextColor.BLUE));
+        return Component.text(amount).color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD).append(Component.text(" XP earned!").color(NamedTextColor.BLUE));
     }
 
     public static Component levelUp(int newLevel){

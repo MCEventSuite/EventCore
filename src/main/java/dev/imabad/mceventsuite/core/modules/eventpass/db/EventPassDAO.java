@@ -49,7 +49,7 @@ public class EventPassDAO extends DAO {
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
-            session.save(eventPassPlayer);
+            session.saveOrUpdate(eventPassPlayer);
             tx.commit();
         }
         catch (RuntimeException e) {

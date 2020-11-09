@@ -90,7 +90,7 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
         if(this.registeredListeners.containsKey(message)){
             this.registeredListeners.get(message).add(redisMessageListener);
         } else {
-            this.registeredListeners.put(message, Arrays.asList(redisMessageListener));
+            this.registeredListeners.put(message, Collections.singletonList(redisMessageListener));
         }
     }
 
@@ -162,7 +162,7 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
 
     public void addToHash(String hashKey, String key, String value){
         try(Jedis jedis = redisConnection.getConnection()){
-            jedis.hsetnx(hashKey, key, value);
+            jedis.hset(hashKey, key, value);
         }
     }
 

@@ -24,7 +24,7 @@ public class InfluxDBModule extends Module implements IConfigProvider<InfluxConf
 
     @Override
     public void onEnable() {
-        client = InfluxDBClientFactory.create(config.getUrl());
+        client = InfluxDBClientFactory.create(config.getUrl(), config.getToken().toCharArray(), config.getOrg(), config.getBucket());
     }
 
     @Override
