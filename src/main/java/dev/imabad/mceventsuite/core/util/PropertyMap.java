@@ -26,4 +26,6 @@ public class PropertyMap extends HashMap<String, Object> {
     public double getDoubleProperty(String name){
         return (double) this.get(name);
     }
+
+    public long getLongProperty(String name) {return (long) this.get(name);}
 }

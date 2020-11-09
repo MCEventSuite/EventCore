@@ -230,4 +230,13 @@ public class EventPlayer implements Serializable {
     public int hashCode() {
         return Objects.hash(uuid);
     }
+
+    public long getLongProperty(String name) {
+        if(properties != null && properties.containsKey(name)){
+            return properties.getLongProperty(name);
+        } else if (defaultProperties.containsKey(name)){
+            return defaultProperties.getLongProperty(name);
+        }
+        return 0;
+    }
 }
