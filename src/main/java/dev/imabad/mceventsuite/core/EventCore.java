@@ -46,6 +46,7 @@ public class EventCore implements IConfigProvider<CoreConfig> {
         });
         moduleRegistry = new ModuleRegistry();
         moduleRegistry.addAndEnableModule(new MySQLModule());
+        moduleRegistry.loadModulesFromFolder(new File(configFolder, "modules"));
     }
 
     public ConfigLoader getConfigLoader() {

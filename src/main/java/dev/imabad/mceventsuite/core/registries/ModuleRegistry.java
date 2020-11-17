@@ -8,7 +8,17 @@ import dev.imabad.mceventsuite.core.api.modules.Module;
 import dev.imabad.mceventsuite.core.api.exceptions.CircularDependencyException;
 import dev.imabad.mceventsuite.core.api.exceptions.NotRegisteredException;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class ModuleRegistry implements IRegistry {
 
@@ -85,6 +95,7 @@ public class ModuleRegistry implements IRegistry {
         if(module instanceof IConfigProvider){
             if(((IConfigProvider<?>) module).saveOnQuit()){
                 ((IConfigProvider<?>) module).saveConfig();
+                EventCore.getInstance().getConfigLoader().saveConfig(((IConfigProvider<?>) module));
             }
         }
         try {
@@ -128,5 +139,65 @@ public class ModuleRegistry implements IRegistry {
     @Override
     public boolean isLoaded() {
         return true;
+    }
+
+    public void loadModulesFromFolder(File modulesFolder){
+        if(!modulesFolder.exists()){
+            System.out.println("Modules folder does not exist, creating.");
+            if(!modulesFolder.mkdir()){
+                System.out.println("Failed to create modules folder, not continuing");
+                return;
+            }
+        }
+        if(!modulesFolder.isDirectory()){
+            System.out.println("Modules folder is not a folder!");
+            return;
+        }
+        System.out.println("Loading modules from modules folder.");
+        for (File file : modulesFolder.listFiles()) {
+            if(!file.getName().endsWith(".jar")){
+                continue;
+            }
+            String mainModuleClass;
+            JarFile jarFile = null;
+            InputStream inputStream = null;
+            try {
+                jarFile = new JarFile(file);
+                JarEntry jarEntry = jarFile.getJarEntry("locator.txt");
+                if(jarEntry == null){
+                    System.out.println("Failed to load module - " + file.getName() + " - Could not find locator.");
+                    continue;
+                }
+                inputStream = jarFile.getInputStream(jarEntry);
+                mainModuleClass = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).readLine();
+            } catch(Exception e){
+                System.out.println("Failed to load module - " + file.getName() + " - " + e.getMessage());
+                continue;
+            } finally {
+                if(jarFile != null)
+                    try {
+                        jarFile.close();
+                    } catch(Exception ignored){}
+                if(inputStream != null)
+                    try {
+                        inputStream.close();
+                    } catch(Exception ignored){}
+            }
+            try {
+                URLClassLoader child = new URLClassLoader(
+                        new URL[]{file.toURI().toURL()},
+                        this.getClass().getClassLoader()
+                );
+                Class<?> classToLoad = Class.forName(mainModuleClass, true, child);
+                if(classToLoad.getSuperclass() != Module.class){
+                    System.out.println("Failed to load module - " + file.getName() + " - Invalid main class");
+                    continue;
+                }
+                Module instance = (Module) classToLoad.newInstance();
+                addAndEnableModule(instance);
+            } catch (Exception e){
+                System.out.println("Failed to load module - " + file.getName() + " - " + e.getMessage());
+            }
+        }
     }
 }

@@ -63,9 +63,11 @@ public class ConfigLoader {
 
     public <T extends BaseConfig> void saveConfig(IConfigProvider<T> iConfigProvider){
         File configFile = new File(configFolder, iConfigProvider.getFileName());
-        try {
-            gson.toJson(iConfigProvider.getConfig(), iConfigProvider.getConfigType(), new FileWriter(configFile));
-        } catch (IOException e) {
+        T baseConfig = iConfigProvider.getConfigType().cast(iConfigProvider.getConfig());
+        String string = gson.toJson(baseConfig, iConfigProvider.getConfigType());
+        try(FileWriter fileWriter = new FileWriter(configFile)){
+            fileWriter.append(string);
+        }catch(IOException e){
             e.printStackTrace();
         }
     }
