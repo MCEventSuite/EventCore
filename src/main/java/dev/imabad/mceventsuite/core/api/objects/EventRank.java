@@ -13,7 +13,7 @@ public class EventRank {
     private String name;
     private String prefix;
     private String suffix;
-    private String chatColor = "&f";
+    private String chatColor = "&fff";
     private List<String> permissions;
     private boolean inheritsFromBelow = true;
     private int initialEventPassXP = 0;
@@ -24,7 +24,7 @@ public class EventRank {
         this.name = name;
         this.prefix = prefix;
         this.suffix = suffix;
-        this.chatColor = "&f";
+        this.chatColor = "&fff";
         this.permissions = permissions;
         this.inheritsFromBelow = inheritsFromBelow;
         this.initialEventPassXP = 0;
@@ -87,10 +87,10 @@ public class EventRank {
 
     @Column(name = "chatColor")
     public String getChatColor() {
-        if(suffix == null){
-            return "";
+        if(chatColor == null){
+            return "#fff";
         }
-        return suffix;
+        return chatColor;
     }
 
     @Column(name = "initialXP")

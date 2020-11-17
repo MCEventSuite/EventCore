@@ -10,6 +10,9 @@ import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassReward;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
 import dev.imabad.mceventsuite.core.modules.mysql.events.MySQLLoadedEvent;
+import dev.imabad.mceventsuite.core.modules.redis.RedisChannel;
+import dev.imabad.mceventsuite.core.modules.redis.RedisModule;
+import dev.imabad.mceventsuite.core.modules.redis.messages.players.UpdatePlayerXPMessage;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -47,9 +50,9 @@ public class EventPassModule extends Module {
         if(wentUpLevel){
             int newLevel = eventPassPlayer.levelFromXP();
             audience.sendMessage(EventPassModule.levelUp(newLevel));
-            audience.playSound(Sound.sound(Key.key("minecraft:ui.toast.challenge_complete"), Sound.Source.AMBIENT, 1f, 1f));
             List<EventPassReward> eventPassRewards = getEventPassRewards().stream().filter(eventPassReward -> eventPassReward.getRequiredLevel() == newLevel).collect(Collectors.toList());
             eventPassRewards.forEach(eventPassReward -> audience.sendMessage(EventPassModule.unlocked(eventPassReward)));
+            EventCore.getInstance().getModuleRegistry().getModule(RedisModule.class).publishMessage(RedisChannel.GLOBAL, new UpdatePlayerXPMessage(player.getUUID(), newLevel));
         }
     }
 
