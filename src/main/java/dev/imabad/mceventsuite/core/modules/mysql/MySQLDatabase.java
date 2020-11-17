@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import org.hibernate.cfg.Environment;
 
 public class MySQLDatabase extends DatabaseProvider {
 
@@ -89,6 +90,7 @@ public class MySQLDatabase extends DatabaseProvider {
 
         // When the pool is exhausted, create one new connection (default is three)
         prop.setProperty("hibernate.c3p0.acquire_increment", "1");
+        prop.setProperty("hibernate.c3p0.validate", "true");
 
         configuration = new Configuration().addProperties(prop);
         configuration.addAnnotatedClass(EventSetting.class);
