@@ -9,7 +9,6 @@ import java.util.Map;
 public class PropertyMapConverter implements AttributeConverter<PropertyMap, String> {
     @Override
     public String convertToDatabaseColumn(PropertyMap attribute) {
-        System.out.println("Converting PropertyMap to JSON for database");
         return GsonUtils.getGson().toJson(attribute);
     }
 
