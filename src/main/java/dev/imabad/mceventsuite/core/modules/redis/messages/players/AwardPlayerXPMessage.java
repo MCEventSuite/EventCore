@@ -8,10 +8,12 @@ public class AwardPlayerXPMessage extends RedisBaseMessage {
 
     private UUID uuid;
     private int amount;
+    private String reason;
 
-    public AwardPlayerXPMessage(UUID uuid, int amount) {
+    public AwardPlayerXPMessage(UUID uuid, int amount, String reason) {
         this.uuid = uuid;
         this.amount = amount;
+        this.reason = reason;
     }
 
     public UUID getUuid() {
@@ -20,5 +22,9 @@ public class AwardPlayerXPMessage extends RedisBaseMessage {
 
     public int getAmount() {
         return amount;
+    }
+
+    public String getReason() {
+        return reason;
     }
 }

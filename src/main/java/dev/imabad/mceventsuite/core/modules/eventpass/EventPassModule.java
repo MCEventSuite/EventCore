@@ -17,41 +17,68 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class EventPassModule extends Module {
 
-    public static Component xpGiven(int amount){
-        return Component.text(amount).color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD).append(Component.text(" XP earned!").color(NamedTextColor.BLUE));
+    public static Component xpGiven(int amount, String reason){
+        return Component.text("You earned ")
+                .color(NamedTextColor.GREEN)
+                .append(Component.text(amount)
+                        .append(Component.text("XP"))
+                        .color(NamedTextColor.YELLOW))
+                .append(Component.text("!")
+                        .color(NamedTextColor.GREEN))
+                .append(Component.newline())
+                .append(Component.text(reason)
+                        .color(NamedTextColor.BLUE));
     }
 
-    public static Component levelUp(int newLevel){
-        return Component.text("You've now leveled up to level ").color(NamedTextColor.BLUE).append(Component.text(newLevel).color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD)).append(Component.text("!").color(NamedTextColor.BLUE));
-    }
-
-    public static Component unlocked(EventPassReward unlocked){
-        return Component.text("You've unlocked the ").color(NamedTextColor.BLUE).append(Component.text(unlocked.getName()).color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD)).append(Component.text("!").color(NamedTextColor.BLUE));
+    public static Component levelUp(int newLevel, EventPassReward unlocked){
+        Component component = Component.text("--------------------------------------------")
+                .color(NamedTextColor.DARK_PURPLE)
+                .append(Component.newline())
+                .append(Component.text("LEVEL UP!").decorate(TextDecoration.BOLD).color(NamedTextColor.YELLOW))
+                .append(Component.text(" You reached Event Pass").color(NamedTextColor.GOLD))
+                .append(Component.text(" Level " + newLevel).color(NamedTextColor.YELLOW))
+                .append(Component.text("!").color(NamedTextColor.GOLD))
+                .append(Component.newline());
+        if(unlocked != null){
+            component = component.append(Component.text("You unlocked").color(NamedTextColor.GOLD))
+            .append(Component.text(" " + unlocked.getName() + " " + unlocked.getDescription()).color(NamedTextColor.LIGHT_PURPLE))
+            .append(Component.newline());
+        }
+       component = component.append(Component.newline())
+                .append(Component.text("Click here").color(NamedTextColor.GREEN).decorate(TextDecoration.UNDERLINED).clickEvent(ClickEvent.openUrl("https://pass.cubedcon.com")))
+                .append(Component.text(" to view the Event Pass rewards online").color(NamedTextColor.BLUE))
+                .append(Component.newline())
+                .color(NamedTextColor.DARK_PURPLE)
+                .append(Component.text("--------------------------------------------"));
+        return component;
     }
 
     private MySQLDatabase mySQLDatabase;
     private EventPassDAO dao;
     private List<EventPassReward> eventPassRewards;
 
-    public void awardXP(EventPlayer player, int amount, Audience audience){
+    public void awardXP(EventPlayer player, int amount, Audience audience, String reason){
         EventPassPlayer eventPassPlayer = dao.getOrCreateEventPass(player);
         boolean wentUpLevel = eventPassPlayer.addXP(amount);
         dao.saveEventPassPlayer(eventPassPlayer);
-        audience.sendActionBar(EventPassModule.xpGiven(amount));
+        audience.sendMessage(EventPassModule.xpGiven(amount, reason));
         if(wentUpLevel){
             int newLevel = eventPassPlayer.levelFromXP();
-            audience.sendMessage(EventPassModule.levelUp(newLevel));
-            List<EventPassReward> eventPassRewards = getEventPassRewards().stream().filter(eventPassReward -> eventPassReward.getRequiredLevel() == newLevel).collect(Collectors.toList());
-            eventPassRewards.forEach(eventPassReward -> audience.sendMessage(EventPassModule.unlocked(eventPassReward)));
+            Optional<EventPassReward> eventPassRewards = getEventPassRewards().stream().filter(eventPassReward -> eventPassReward.getRequiredLevel() == newLevel).findFirst();
+            Component message;
+            message = eventPassRewards.map(eventPassReward -> EventPassModule.levelUp(newLevel, eventPassReward)).orElseGet(() -> EventPassModule.levelUp(newLevel, null));
+            audience.sendMessage(message);
             EventCore.getInstance().getModuleRegistry().getModule(RedisModule.class).publishMessage(RedisChannel.GLOBAL, new UpdatePlayerXPMessage(player.getUUID(), newLevel));
         }
     }

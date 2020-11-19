@@ -26,7 +26,7 @@ public class ProfanityUtils {
     }
 
     public static boolean containsProfanity(String message) {
-        return pattern.matcher(message).find();
+        return pattern.matcher(message.toLowerCase()).find();
     }
 
 }

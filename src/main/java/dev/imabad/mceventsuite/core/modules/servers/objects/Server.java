@@ -8,15 +8,17 @@ public class Server {
     private String ipAddress;
     private int port;
     private int powerRequired;
+    private int priority;
 
     private boolean online = false;
     private int playerCount = 0;
 
-    public Server(String name, String ipAddress, int port, int powerRequired) {
+    public Server(String name, String ipAddress, int port, int powerRequired, int priority) {
         this.name = name;
         this.ipAddress = ipAddress;
         this.port = port;
         this.powerRequired = powerRequired;
+        this.priority = priority;
     }
 
     public String getName() {
@@ -69,5 +71,9 @@ public class Server {
 
     public void setOnline(boolean online) {
         this.online = online;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 }
