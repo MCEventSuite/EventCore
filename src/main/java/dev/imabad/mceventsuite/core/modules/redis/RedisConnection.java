@@ -59,9 +59,23 @@ public class RedisConnection extends DatabaseProvider {
         return this.connection.getResource();
     }
 
+    public void stopThread(){
+        if(this.redisSubscriberThread.isAlive()){
+            this.redisSubscriberThread.stop();
+        }
+    }
+
     public void startSubscriberThread(){
         this.redisSubscriberThread = new Thread(new RedisSubscriberThread(subscriber, config));
-        this.redisSubscriberThread.setUncaughtExceptionHandler((t, e) -> startSubscriberThread());
+        this.redisSubscriberThread.setUncaughtExceptionHandler((t, e) -> {
+            System.out.println("==============================================");
+            System.out.println("==============================================");
+            System.out.println("Redis subscriber thread crashed - restarting");
+            System.out.println("==============================================");
+            System.out.println("==============================================");
+            e.printStackTrace();
+            startSubscriberThread();
+        });
         this.redisSubscriberThread.start();
     }
 }

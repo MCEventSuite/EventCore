@@ -198,4 +198,9 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
     public RedisPlayerManager getRedisPlayerManager() {
         return redisPlayerManager;
     }
+
+    public void refreshSubscriber(){
+        redisConnection.startSubscriberThread();
+        redisConnection.startSubscriberThread();
+    }
 }
