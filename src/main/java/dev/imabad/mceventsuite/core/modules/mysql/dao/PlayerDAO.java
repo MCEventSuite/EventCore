@@ -49,6 +49,10 @@ public class PlayerDAO extends DAO {
             if (eventPlayer == null) {
                 eventPlayer = new EventPlayer(uuid, username);
                 savePlayer(eventPlayer);
+            } else {
+                if(!eventPlayer.getUUID().equals(uuid)){
+                    eventPlayer.setUUID(uuid);
+                }
             }
         }
         return eventPlayer;
@@ -91,7 +95,6 @@ public class PlayerDAO extends DAO {
             try {
                 return q.getSingleResult();
             } catch (NoResultException e) {
-                e.printStackTrace();
                 return null;
             }
         }

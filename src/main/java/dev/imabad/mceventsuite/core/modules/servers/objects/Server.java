@@ -9,16 +9,18 @@ public class Server {
     private int port;
     private int powerRequired;
     private int priority;
+    private int maxPlayers;
 
     private boolean online = false;
     private int playerCount = 0;
 
-    public Server(String name, String ipAddress, int port, int powerRequired, int priority) {
+    public Server(String name, String ipAddress, int port, int powerRequired, int priority, int maxPlayers) {
         this.name = name;
         this.ipAddress = ipAddress;
         this.port = port;
         this.powerRequired = powerRequired;
         this.priority = priority;
+        this.maxPlayers = maxPlayers;
     }
 
     public String getName() {
@@ -75,5 +77,17 @@ public class Server {
 
     public int getPriority() {
         return priority;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public void setMaxPlayers(int maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
+
+    public boolean isFull(){
+        return getPlayerCount() >= getMaxPlayers();
     }
 }

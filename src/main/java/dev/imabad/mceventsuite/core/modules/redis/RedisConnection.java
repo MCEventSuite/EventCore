@@ -45,8 +45,7 @@ public class RedisConnection extends DatabaseProvider {
         } else {
             connection = new JedisPool(new JedisPoolConfig(), config.getHostname(), config.getPort());
         }
-        this.redisSubscriberThread = new Thread(new RedisSubscriberThread(subscriber, config));
-        this.redisSubscriberThread.start();
+        startSubscriberThread();
         EventCore.getInstance().getEventRegistry().handleEvent(new RedisConnectionEvent());
     }
 
@@ -58,5 +57,11 @@ public class RedisConnection extends DatabaseProvider {
 
     public Jedis getConnection() {
         return this.connection.getResource();
+    }
+
+    public void startSubscriberThread(){
+        this.redisSubscriberThread = new Thread(new RedisSubscriberThread(subscriber, config));
+        this.redisSubscriberThread.setUncaughtExceptionHandler((t, e) -> startSubscriberThread());
+        this.redisSubscriberThread.start();
     }
 }
