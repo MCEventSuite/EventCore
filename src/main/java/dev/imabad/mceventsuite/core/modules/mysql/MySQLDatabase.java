@@ -1,35 +1,28 @@
 package dev.imabad.mceventsuite.core.modules.mysql;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.database.DatabaseProvider;
 import dev.imabad.mceventsuite.core.api.database.DatabaseType;
-import dev.imabad.mceventsuite.core.api.objects.*;
 import dev.imabad.mceventsuite.core.config.database.MySQLConfig;
-import dev.imabad.mceventsuite.core.modules.ac.db.AccessControlSetting;
-import dev.imabad.mceventsuite.core.modules.ac.db.PlayerBan;
-import dev.imabad.mceventsuite.core.modules.announcements.db.ScheduledAnnouncement;
-import dev.imabad.mceventsuite.core.modules.audit.db.AuditLogEntry;
-import dev.imabad.mceventsuite.core.modules.discord.DiscordLink;
-import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassPlayer;
-import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassReward;
-import dev.imabad.mceventsuite.core.modules.mysql.dao.*;
+import dev.imabad.mceventsuite.core.modules.mysql.dao.BoothDAO;
+import dev.imabad.mceventsuite.core.modules.mysql.dao.DAO;
+import dev.imabad.mceventsuite.core.modules.mysql.dao.InvalidDAOException;
+import dev.imabad.mceventsuite.core.modules.mysql.dao.PlayerDAO;
+import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
+import dev.imabad.mceventsuite.core.modules.mysql.dao.SettingDAO;
 import dev.imabad.mceventsuite.core.modules.mysql.events.MySQLLoadedEvent;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-
-import javax.persistence.Entity;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
-import org.hibernate.cfg.Environment;
 
 public class MySQLDatabase extends DatabaseProvider {
 
     private MySQLConfig mySQLConfig;
-    private SessionFactory sessionFactory;
-    private Configuration configuration;
+    private HikariDataSource dataSource;
 
     private Set<DAO> registeredDAOs;
 
@@ -46,7 +39,7 @@ public class MySQLDatabase extends DatabaseProvider {
 
     @Override
     public boolean isConnected() {
-        return !sessionFactory.isClosed();
+        return !dataSource.isClosed();
     }
 
     @Override
@@ -61,52 +54,20 @@ public class MySQLDatabase extends DatabaseProvider {
 
     @Override
     public void connect() {
-        Properties prop= new Properties();
+        HikariConfig config = new HikariConfig();
 
         String connectionString = mySQLConfig.getPort() != 0
             ? String.format("jdbc:mysql://%s:%d/%s", mySQLConfig.getHostname(), mySQLConfig.getPort(),
                 mySQLConfig.getDatabase())
             : String.format("jdbc:mysql://%s/%s", mySQLConfig.getHostname(), mySQLConfig.getDatabase());
 
-        prop.setProperty("hibernate.connection.url", connectionString);
-
-        //You can use any database you want, I had it configured for Postgres
-        prop.setProperty("hibernate.dialect", "org.hibernate.dialect.MariaDB103Dialect");
-
-        prop.setProperty("hibernate.connection.username", mySQLConfig.getUsername());
+        config.setJdbcUrl(connectionString);
+        config.setUsername(mySQLConfig.getUsername());
 
         if(mySQLConfig.getPassword().length() > 0) {
-            prop.setProperty("hibernate.connection.password", mySQLConfig.getPassword());
+            config.setPassword(mySQLConfig.getPassword());
         }
-
-        prop.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
-        prop.setProperty("hibernate.globally_quoted_identifiers", "true");
-        prop.setProperty("hibernate.hbm2ddl.auto", "update");
-        prop.setProperty("show_sql", "true");
-        prop.setProperty("format_sql", "true");
-
-        // Start with just one connection (default is three)
-        prop.setProperty("hibernate.c3p0.min_size", "1");
-
-        // When the pool is exhausted, create one new connection (default is three)
-        prop.setProperty("hibernate.c3p0.acquire_increment", "1");
-        prop.setProperty("hibernate.c3p0.validate", "true");
-
-        configuration = new Configuration().addProperties(prop);
-        configuration.addAnnotatedClass(EventSetting.class);
-        configuration.addAnnotatedClass(EventPlayer.class);
-        configuration.addAnnotatedClass(EventRank.class);
-        configuration.addAnnotatedClass(EventBooth.class);
-        configuration.addAnnotatedClass(AccessControlSetting.class);
-        configuration.addAnnotatedClass(PlayerBan.class);
-        configuration.addAnnotatedClass(AuditLogEntry.class);
-        configuration.addAnnotatedClass(DiscordLink.class);
-        configuration.addAnnotatedClass(EventBoothPlot.class);
-        configuration.addAnnotatedClass(ScheduledAnnouncement.class);
-        configuration.addAnnotatedClass(EventPassPlayer.class);
-        configuration.addAnnotatedClass(EventPassReward.class);
-        configuration.addPackage("dev.imabad.mceventsuite");
-        sessionFactory = configuration.buildSessionFactory();
+        dataSource = new HikariDataSource(config);
         EventCore.getInstance().getEventRegistry().handleEvent(new MySQLLoadedEvent(this));
     }
 
@@ -120,11 +81,11 @@ public class MySQLDatabase extends DatabaseProvider {
 
     @Override
     public void disconnect() {
-        if(sessionFactory != null)
-            sessionFactory.close();
+        if(dataSource != null)
+            dataSource.close();
     }
 
-    public Session getSession(){
-        return sessionFactory.openSession();
+    public Connection getSession() throws SQLException {
+        return dataSource.getConnection();
     }
 }

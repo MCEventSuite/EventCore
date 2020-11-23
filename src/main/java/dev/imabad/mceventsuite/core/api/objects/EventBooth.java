@@ -1,11 +1,8 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
-import javax.persistence.*;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
-@Table(name = "booths")
 public class EventBooth {
 
     private String id;
@@ -16,8 +13,6 @@ public class EventBooth {
     private String plotID;
     private String status = "un-assigned";
 
-    protected EventBooth(){}
-
     public EventBooth(String name, String boothType, EventPlayer owner, List<EventPlayer> members){
         this.id = UUID.randomUUID().toString();
         this.name = name;
@@ -26,11 +21,17 @@ public class EventBooth {
         this.members = members;
     }
 
+    public EventBooth(String id, String name, String boothType, EventPlayer owner, List<EventPlayer> members, String plotID, String status){
+        this(name, boothType, owner, members);
+        this.id = id;
+        this.plotID = plotID;
+        this.status = status;
+    }
+
     public void setId(String id) {
         this.id = id;
     }
 
-    @Id
     public String getId() {
         return id;
     }
@@ -51,7 +52,6 @@ public class EventBooth {
         this.boothType = boothType;
     }
 
-    @OneToOne(fetch = FetchType.EAGER)
     public EventPlayer getOwner() {
         return owner;
     }
@@ -60,7 +60,6 @@ public class EventBooth {
         this.owner = owner;
     }
 
-    @ManyToMany(fetch = FetchType.EAGER)
     public List<EventPlayer> getMembers() {
         return members;
     }

@@ -1,10 +1,8 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
-import javax.persistence.*;
 import java.util.UUID;
 
-@Entity
-@Table(name = "booth_plots")
+//TODO: Move into a separate module
 public class EventBoothPlot {
 
     private String id;
@@ -14,8 +12,6 @@ public class EventBoothPlot {
     private String frontPos;
     private String status = "empty";
     private EventBooth booth;
-
-    protected EventBoothPlot(){}
 
     public EventBoothPlot(String boothType, String posOne, String posTwo){
         this.id = UUID.randomUUID().toString();
@@ -28,7 +24,6 @@ public class EventBoothPlot {
         this.id = id;
     }
 
-    @Id
     public String getId() {
         return id;
     }
@@ -41,7 +36,6 @@ public class EventBoothPlot {
         this.boothType = boothType;
     }
 
-    @OneToOne(fetch = FetchType.EAGER)
     public EventBooth getBooth() {
         return booth;
     }
@@ -82,6 +76,7 @@ public class EventBoothPlot {
         this.frontPos = frontPos;
     }
 
+    //TODO: Come back and rewrite this to not be hard-coded
     public int plotSize(){
         switch(boothType){
             case "small":

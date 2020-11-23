@@ -2,11 +2,10 @@ package dev.imabad.mceventsuite.core.modules.mysql.dao;
 
 import dev.imabad.mceventsuite.core.api.objects.EventSetting;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
-
-import javax.persistence.NoResultException;
-import java.util.UUID;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class SettingDAO extends DAO {
 
@@ -24,10 +23,21 @@ public class SettingDAO extends DAO {
      * @see         EventSetting
      */
     public EventSetting getSetting(String group, String name){
-        try(Session session = mySQLDatabase.getSession()) {
-            Query<EventSetting> query = session.createQuery("SELECT s FROM EventSetting s WHERE s.group = :group AND s.name = :name", EventSetting.class).setParameter("group", group).setParameter("name", name);
-            return query.getSingleResult();
+        try(Connection connection = mySQLDatabase.getSession()){
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM event_settings WHERE event_settings.group = ? AND event_settings.name = ?");
+            preparedStatement.setString(1, group);
+            preparedStatement.setString(2, name);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()) {
+                return new EventSetting(resultSet.getString("group"), resultSet.getString("name"), resultSet.getString("value"), resultSet.getString("permission"));
+            } else {
+                return null;
+            }
+        }catch(SQLException e){
+            //TODO: Better logging
+            e.printStackTrace();
         }
+        return null;
     }
 
     /**
@@ -39,25 +49,65 @@ public class SettingDAO extends DAO {
      * @see                 EventSetting
      */
     public EventSetting getSetting(EventSetting eventSetting){
-        try(Session session = mySQLDatabase.getSession()) {
-            Query<EventSetting> query = session.createQuery("SELECT s FROM EventSetting s WHERE s.group = :group AND s.name = :name", EventSetting.class).setParameter("group", eventSetting.getGroup()).setParameter("name", eventSetting.getName());
-            try {
-                return query.getSingleResult();
-            } catch (NoResultException e) {
-                return eventSetting;
-            }
+        EventSetting dbSetting = getSetting(eventSetting.getGroup(), eventSetting.getName());
+        if(dbSetting == null){
+            return eventSetting;
         }
+        return dbSetting;
     }
 
     /**
-     * Saves a setting to the database
+     * Saves a new setting to the database
      * @param eventSetting  The setting to save
      * @see                 EventSetting
      */
-    public void saveSetting(EventSetting eventSetting){
-        try(Session session = mySQLDatabase.getSession()) {
-            session.save(eventSetting);
+    public boolean saveNewSetting(EventSetting eventSetting){
+        if(settingExists(eventSetting)){
+            return saveSetting(eventSetting);
         }
+        try(Connection connection = mySQLDatabase.getSession()){
+            PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO event_settings VALUES (?, ?, ?, ?);");
+            insertStatement.setString(1, eventSetting.getName());
+            insertStatement.setString(2, eventSetting.getGroup());
+            insertStatement.setString(3, eventSetting.getPermission());
+            insertStatement.setString(4, eventSetting.getValueJSON());
+            return insertStatement.executeUpdate() != 0;
+        }catch(SQLException exception){
+            //TODO: Add proper logging
+            exception.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean saveSetting(EventSetting eventSetting){
+        if(!settingExists(eventSetting)){
+            return saveNewSetting(eventSetting);
+        }
+        try(Connection connection = mySQLDatabase.getSession()){
+            PreparedStatement insertStatement = connection.prepareStatement("UPDATE event_settings SET value = ? WHERE group = ? AND name = ?;");
+            insertStatement.setString(1, eventSetting.getValueJSON());
+            insertStatement.setString(2, eventSetting.getGroup());
+            insertStatement.setString(3, eventSetting.getName());
+            return insertStatement.executeUpdate() != 0;
+        }catch(SQLException exception){
+            //TODO: Add proper logging
+            exception.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean settingExists(EventSetting setting){
+        try(Connection connection = mySQLDatabase.getSession()){
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT value FROM event_settings WHERE event_settings.group = ? AND event_settings.name = ?");
+            preparedStatement.setString(1, setting.getGroup());
+            preparedStatement.setString(2, setting.getName());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        }catch(SQLException e){
+            //TODO: Better logging
+            e.printStackTrace();
+        }
+        return false;
     }
 
 }

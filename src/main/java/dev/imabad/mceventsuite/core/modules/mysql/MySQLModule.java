@@ -3,7 +3,7 @@ package dev.imabad.mceventsuite.core.modules.mysql;
 import dev.imabad.mceventsuite.core.api.IConfigProvider;
 import dev.imabad.mceventsuite.core.api.modules.Module;
 import dev.imabad.mceventsuite.core.config.database.MySQLConfig;
-
+import dev.imabad.mceventsuite.core.modules.mysql.dao.DAO;
 import java.util.Collections;
 import java.util.List;
 
@@ -85,8 +85,11 @@ public class MySQLModule extends Module implements IConfigProvider<MySQLConfig> 
         return false;
     }
 
-
     public MySQLDatabase getMySQLDatabase() {
         return mySQLDatabase;
+    }
+
+    public <T extends DAO> T getDAO(Class<T> dao){
+        return mySQLDatabase.getDAO(dao);
     }
 }
