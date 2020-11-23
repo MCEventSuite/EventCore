@@ -1,11 +1,8 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
-
-import javax.persistence.*;
 import java.util.List;
 
-@Entity
-@Table(name = "ranks")
+//TODO: Remove XP from here.
 public class EventRank {
 
     private int id;
@@ -17,7 +14,6 @@ public class EventRank {
     private List<String> permissions;
     private boolean inheritsFromBelow = true;
     private int initialEventPassXP = 0;
-
 
     public EventRank(int power, String name, String prefix, String suffix, List<String> permissions, boolean inheritsFromBelow) {
         this.power = power;
@@ -34,32 +30,24 @@ public class EventRank {
         this(power, name, prefix, suffix, permissions, true);
     }
 
-    public EventRank(int id, int power, String name, String prefix, String suffix, List<String> permissions, boolean inheritsFromBelow){
+    public EventRank(int id, int power, String name, String prefix, String suffix, List<String> permissions, boolean inheritsFromBelow, String chatColor){
         this(power, name, prefix, suffix, permissions, inheritsFromBelow);
         this.id = id;
+        this.chatColor = chatColor;
     }
 
-    public EventRank() {
-    }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", unique = true)
     public int getId() {
         return id;
     }
 
-    @Column(name = "power")
     public int getPower() {
         return power;
     }
 
-    @Column(name = "name")
     public String getName() {
         return name;
     }
 
-    @Column(name = "prefix")
     public String getPrefix() {
         if(prefix == null){
             return "";
@@ -67,7 +55,6 @@ public class EventRank {
         return prefix;
     }
 
-    @Column(name = "suffix")
     public String getSuffix() {
         if(suffix == null){
             return "";
@@ -75,17 +62,14 @@ public class EventRank {
         return suffix;
     }
 
-    @ElementCollection(fetch = FetchType.EAGER)
     public List<String> getPermissions() {
         return permissions;
     }
 
-    @Column(name = "inheritsFromBelow")
     public boolean isInheritsFromBelow() {
         return inheritsFromBelow;
     }
 
-    @Column(name = "chatColor")
     public String getChatColor() {
         if(chatColor == null){
             return "#fff";
@@ -93,7 +77,6 @@ public class EventRank {
         return chatColor;
     }
 
-    @Column(name = "initialXP")
     public int getInitialEventPassXP() {
         return initialEventPassXP;
     }
@@ -134,6 +117,7 @@ public class EventRank {
         this.initialEventPassXP = initialEventPassXP;
     }
 
+    //TODO: Modify this to allow for negated permissions
     private boolean containsPermission(String permission){
         return this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission));
     }

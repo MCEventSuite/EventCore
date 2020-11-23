@@ -1,14 +1,12 @@
 package dev.imabad.mceventsuite.core.modules.discord;
 
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
-import dev.imabad.mceventsuite.core.modules.audit.db.AuditLogEntry;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.DAO;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
-
-import javax.persistence.NoResultException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import redis.clients.jedis.Transaction;
 
 public class DiscordLinkDAO extends DAO {
 
@@ -17,14 +15,16 @@ public class DiscordLinkDAO extends DAO {
     }
 
     public EventPlayer getPlayerFromDiscord(String discordID){
-        try(Session session = mySQLDatabase.getSession()){
-            Query<EventPlayer> q= session.createQuery("select d.player FROM DiscordLink d LEFT JOIN FETCH d.player.permissions e WHERE d.discordID = :discordID", EventPlayer.class);
-            q.setParameter("discordID", discordID);
+        try(Connection connection = mySQLDatabase.getSession()){
+            PreparedStatement query = connection.prepareStatement("SELECT * FROM players WHERE players.uuid = (SELECT player FROM discord_links WHERE discordID = ?) LIMIT 1;");
+            query.setString(1, discordID);
             try {
                 return q.getSingleResult();
             } catch (NoResultException e) {
                 return null;
             }
+        } catch(SQLException ignored){
+            return null;
         }
     }
 

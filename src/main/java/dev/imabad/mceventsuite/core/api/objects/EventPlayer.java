@@ -1,26 +1,15 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
 import dev.imabad.mceventsuite.core.EventCore;
-import dev.imabad.mceventsuite.core.api.actions.Action;
-import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassPlayer;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
-import dev.imabad.mceventsuite.core.modules.mysql.PropertyMapConverter;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
 import dev.imabad.mceventsuite.core.util.PropertyMap;
-import java.io.Serializable;
-import jdk.nashorn.internal.runtime.Property;
-import org.hibernate.annotations.DynamicUpdate;
-
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Entity
-@Table(name = "players")
-@DynamicUpdate
-public class EventPlayer implements Serializable {
+public class EventPlayer {
 
     private static PropertyMap defaultProperties = new PropertyMap();
 
@@ -28,16 +17,13 @@ public class EventPlayer implements Serializable {
         defaultProperties.put(name, defaultValue);
     }
 
-    @org.hibernate.annotations.Type(type="uuid-char")
     private UUID uuid;
     private String lastUsername;
     private EventRank rank;
     private List<String> permissions;
     private PropertyMap properties = defaultProperties;
 
-    protected EventPlayer(){}
-
-    protected EventPlayer(UUID uuid, String lastUsername, EventRank rank, List<String> permissions, PropertyMap properties) {
+    public EventPlayer(UUID uuid, String lastUsername, EventRank rank, List<String> permissions, PropertyMap properties) {
         this.uuid = uuid;
         this.lastUsername = lastUsername;
         this.rank = rank;
@@ -48,13 +34,10 @@ public class EventPlayer implements Serializable {
     public EventPlayer(UUID uuid, String username){
         this.uuid = uuid;
         this.lastUsername = username;
-        this.rank = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(RankDAO.class).getLowestRank().get();
+        this.rank = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getDAO(RankDAO.class).getLowestRank().get();
         this.properties = defaultProperties;
     }
 
-    @Id
-    @Column(name="uuid", unique = true, nullable = false)
-    @org.hibernate.annotations.Type(type="uuid-char")
     public UUID getUUID() {
         return uuid;
     }
@@ -63,7 +46,6 @@ public class EventPlayer implements Serializable {
         this.uuid = uuid;
     }
 
-    @Column(name = "last_username")
     public String getLastUsername() {
         return lastUsername;
     }
@@ -72,8 +54,6 @@ public class EventPlayer implements Serializable {
         this.lastUsername = lastUsername;
     }
 
-    @OneToOne
-    @JoinColumn(name="rank_id", referencedColumnName = "id")
     public EventRank getRank() {
         return rank;
     }
@@ -82,7 +62,6 @@ public class EventPlayer implements Serializable {
         this.rank = rank;
     }
 
-    @ElementCollection
     public List<String> getPermissions() {
         return permissions;
     }
@@ -111,7 +90,7 @@ public class EventPlayer implements Serializable {
             hasPerm = playerHasPermission(permission);
         }
         if(!hasPerm && rank.isInheritsFromBelow()){
-            for(EventRank eventRank : EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase().getDAO(RankDAO.class).getRanks()){
+            for(EventRank eventRank : EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getDAO(RankDAO.class).getRanks().values()){
                 if(eventRank.getPower() <= rank.getPower() && eventRank.hasPermission(permission)){
                     return true;
                 }
@@ -139,12 +118,11 @@ public class EventPlayer implements Serializable {
         return containsPermission(permission);
     }
 
+    //TODO: Modify this to allow for negated permissions
     private boolean containsPermission(String permission){
         return this.permissions != null && (this.permissions.contains(permission) || (!this.permissions.contains('-' + permission) && this.permissions.contains('+' + permission)));
     }
 
-    @Column(name="properties")
-    @Convert(converter = PropertyMapConverter.class)
     public PropertyMap getProperties() {
         return properties;
     }
