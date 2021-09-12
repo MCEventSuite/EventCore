@@ -44,6 +44,17 @@ public class EventPassDAO extends DAO {
         }
     }
 
+    public List<EventPassPlayer> getEventPassPlayers() {
+        try (Session session = mySQLDatabase.getSession()) {
+            Query<EventPassPlayer> q= session.createQuery("select p FROM EventPassPlayer p", EventPassPlayer.class);
+            try {
+                return q.list();
+            } catch (NoResultException e) {
+                return null;
+            }
+        }
+    }
+
     public void saveEventPassPlayer(EventPassPlayer eventPassPlayer){
         Session session = mySQLDatabase.getSession();
         Transaction tx = null;
@@ -61,12 +72,57 @@ public class EventPassDAO extends DAO {
         }
     }
 
-    public List<EventPassReward> getRewards(){
+    public List<EventPassReward> getUnlockedRewards(EventPlayer player) {
         Session session = mySQLDatabase.getSession();
         try {
-            return session.createQuery("select r from EventPassReward r", EventPassReward.class).list();
+            Query<EventPassReward> query = session.createQuery("select r from EventPassUnlockedReward r WHERE r.player = :player", EventPassReward.class);
+            query.setParameter("player", player);
+            return query.list();
         } finally {
             session.close();
         }
     }
+
+    public List<EventPassReward> getUnlockedRewards(EventPassPlayer player) {
+        return getUnlockedRewards(player.getPlayer());
+    }
+
+    public void saveUnlockedReward(EventPassUnlockedReward eventPassUnlockedReward){
+        Session session = mySQLDatabase.getSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.saveOrUpdate(eventPassUnlockedReward);
+            tx.commit();
+        }
+        catch (RuntimeException e) {
+            tx.rollback();
+            e.printStackTrace();
+        }
+        finally {
+            session.close();
+        }
+    }
+
+    public List<EventPassReward> getRewards(int year){
+        Session session = mySQLDatabase.getSession();
+        try {
+            Query<EventPassReward> query = session.createQuery("select r from EventPassReward r WHERE r.year = :year", EventPassReward.class);
+            query.setParameter("year", year);
+            return query.list();
+        } finally {
+            session.close();
+        }
+    }
+
+    public List<EventPassReward> getAllRewards(){
+        Session session = mySQLDatabase.getSession();
+        try {
+            Query<EventPassReward> query = session.createQuery("select r from EventPassReward r", EventPassReward.class);
+            return query.list();
+        } finally {
+            session.close();
+        }
+    }
+
 }

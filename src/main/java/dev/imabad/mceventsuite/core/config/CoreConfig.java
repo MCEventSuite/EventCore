@@ -5,6 +5,7 @@ import dev.imabad.mceventsuite.core.api.BaseConfig;
 public class CoreConfig extends BaseConfig {
 
   private String identifier = "unknown";
+  private String currentYear = "2021";
 
   @Override
   public String getName() {
@@ -13,5 +14,13 @@ public class CoreConfig extends BaseConfig {
 
   public String getIdentifier() {
     return identifier;
+  }
+
+  public String getCurrentYear() {
+    return currentYear;
+  }
+
+  public int getCurrentYearAsInt(){
+    return Integer.parseInt(currentYear);
   }
 }

@@ -14,6 +14,7 @@ public class EventPassReward {
     private String description;
     private String image;
     private int requiredLevel;
+    private int year;
 
     protected EventPassReward(){}
 
@@ -64,5 +65,13 @@ public class EventPassReward {
 
     public void setRequiredLevel(int requiredLevel) {
         this.requiredLevel = requiredLevel;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
     }
 }

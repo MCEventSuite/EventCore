@@ -7,6 +7,7 @@ import dev.imabad.mceventsuite.core.modules.announcements.db.ScheduledAnnounceme
 import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassDAO;
 import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassPlayer;
 import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassReward;
+import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassUnlockedReward;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
 import dev.imabad.mceventsuite.core.modules.mysql.events.MySQLLoadedEvent;
@@ -76,6 +77,10 @@ public class EventPassModule extends Module {
         if(wentUpLevel){
             int newLevel = eventPassPlayer.levelFromXP();
             Optional<EventPassReward> eventPassRewards = getEventPassRewards().stream().filter(eventPassReward -> eventPassReward.getRequiredLevel() == newLevel).findFirst();
+            eventPassRewards.ifPresent(reward -> {
+                EventPassUnlockedReward unlockedReward = new EventPassUnlockedReward(reward, player);
+                dao.saveUnlockedReward(unlockedReward);
+            });
             Component message;
             message = eventPassRewards.map(eventPassReward -> EventPassModule.levelUp(newLevel, eventPassReward)).orElseGet(() -> EventPassModule.levelUp(newLevel, null));
             audience.sendMessage(message);
@@ -94,7 +99,7 @@ public class EventPassModule extends Module {
         EventCore.getInstance().getEventRegistry().registerListener(MySQLLoadedEvent.class, mySQLLoadedEvent -> {
             dao = new EventPassDAO(mySQLDatabase);
             mySQLDatabase.registerDAOs(dao);
-            eventPassRewards = dao.getRewards();
+            eventPassRewards = dao.getRewards(EventCore.getInstance().getConfig().getCurrentYearAsInt());
         });
     }
 
