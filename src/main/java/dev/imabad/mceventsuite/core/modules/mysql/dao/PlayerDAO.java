@@ -110,9 +110,13 @@ public class PlayerDAO extends DAO {
         Transaction tx = null;
         try (Session session = mySQLDatabase.getSession()) {
             tx = session.beginTransaction();
+            player = (EventPlayer) session.merge("dev.imabad.mceventsuite.core.api.objects.EventPlayer", player);
             session.saveOrUpdate(player);
             tx.commit(); // Flush happens automatically
         } catch (RuntimeException e) {
+            e.printStackTrace();
+            System.out.println("Error in saveOrUpdate player, attempting rollback...");
+
             assert tx != null;
             tx.rollback();
         }
