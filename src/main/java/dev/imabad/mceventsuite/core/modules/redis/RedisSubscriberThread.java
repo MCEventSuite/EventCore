@@ -18,6 +18,7 @@ public class RedisSubscriberThread implements Runnable {
 
     @Override
     public void run() {
+        this.subscriber.select(Integer.parseInt(redisConfig.getDatabase()));
         this.subscriber.subscribe(new RedisPubSub(this.redisConfig), redisConfig.getChannels().toArray(new String[0]));
     }
 

@@ -40,10 +40,10 @@ public class RedisConnection extends DatabaseProvider {
         subscriber = new Jedis(config.getHostname(), config.getPort());
         subscriber.connect();
         if(config.getPassword().length() > 0){
-            connection = new JedisPool(new JedisPoolConfig(), config.getHostname(), config.getPort(),2000, config.getPassword());
+            connection = new JedisPool(new JedisPoolConfig(), config.getHostname(), config.getPort(),2000, config.getPassword(), Integer.parseInt(config.getDatabase()));
             subscriber.auth(config.getPassword());
         } else {
-            connection = new JedisPool(new JedisPoolConfig(), config.getHostname(), config.getPort());
+            connection = new JedisPool(new JedisPoolConfig(), config.getHostname(), config.getPort(), 2000, null, Integer.parseInt(config.getDatabase()));
         }
         startSubscriberThread();
         EventCore.getInstance().getEventRegistry().handleEvent(new RedisConnectionEvent());
