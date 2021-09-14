@@ -65,9 +65,6 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
         this.redisConnection = new RedisConnection(config);
         redisThread = new Thread(redisConnection::connect);
         redisThread.start();
-        redisThread.setUncaughtExceptionHandler((t, e) -> {
-
-        });
         this.setEnabled(true);
         EventCore.getInstance().getEventRegistry().registerListener(RedisConnectionEvent.class, (event) -> {
             mutedPlayersManager = new MutedPlayersManager(this);
