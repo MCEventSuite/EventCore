@@ -20,47 +20,69 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class EventPassModule extends Module {
 
+    private static final HashMap<Integer, Integer> LEVELS = new HashMap<>();
+
+    static {
+        for(int i = 1; i < 51; i++) {
+            int xp = experience(i);
+            LEVELS.put(xp, i);
+        }
+    }
+
+    public static int experience(int level){
+        if(level == 1){
+            return 500;
+        }
+        double pastExperience = experience(level - 1);
+        pastExperience = pastExperience + (500 + ((level - 1) * 50));
+        return (int) Math.round(pastExperience);
+    }
+
+    public static int levelFromExperience(int experience) {
+        return LEVELS.get(LEVELS.keySet().stream().min(Comparator.comparingInt(i -> Math.abs(i - experience)))
+                .orElse(-1));
+    }
+
     public static Component xpGiven(int amount, String reason){
-        return Component.text("You earned ")
-                .color(NamedTextColor.GREEN)
-                .append(Component.text(amount)
+        return Component.newline()
+                .append(Component.text("+")
+                        .append(Component.text(amount))
                         .append(Component.text("XP"))
-                        .color(NamedTextColor.YELLOW))
-                .append(Component.text("!")
-                        .color(NamedTextColor.GREEN))
-                .append(Component.newline())
+                        .color(NamedTextColor.GOLD)
+                        .decorate(TextDecoration.BOLD)
+                )
                 .append(Component.text(reason)
-                        .color(NamedTextColor.BLUE));
+                        .color(NamedTextColor.LIGHT_PURPLE))
+                .append(Component.newline());
     }
 
     public static Component levelUp(int newLevel, EventPassReward unlocked){
         Component component = Component.text("--------------------------------------------")
-                .color(NamedTextColor.DARK_PURPLE)
+                .color(NamedTextColor.BLUE)
                 .append(Component.newline())
                 .append(Component.text("LEVEL UP!").decorate(TextDecoration.BOLD).color(NamedTextColor.YELLOW))
-                .append(Component.text(" You reached Event Pass").color(NamedTextColor.GOLD))
+                .append(Component.text(" You reached Event Pass").color(NamedTextColor.LIGHT_PURPLE))
                 .append(Component.text(" Level " + newLevel).color(NamedTextColor.YELLOW))
                 .append(Component.text("!").color(NamedTextColor.GOLD))
                 .append(Component.newline());
         if(unlocked != null){
-            component = component.append(Component.text("You unlocked").color(NamedTextColor.GOLD))
-            .append(Component.text(" " + unlocked.getName() + " " + unlocked.getDescription()).color(NamedTextColor.LIGHT_PURPLE))
+            component = component.append(Component.text("You unlocked").color(NamedTextColor.LIGHT_PURPLE))
+            .append(Component.text(" " + unlocked.getName() + " " + unlocked.getDescription()).color(NamedTextColor.GOLD))
             .append(Component.newline());
         }
        component = component.append(Component.newline())
                 .append(Component.text("Click here").color(NamedTextColor.GREEN).decorate(TextDecoration.UNDERLINED).clickEvent(ClickEvent.openUrl("https://pass.cubedcon.com")))
-                .append(Component.text(" to view the Event Pass rewards online").color(NamedTextColor.BLUE))
+                .append(Component.text(" to view the Event Pass rewards online").color(NamedTextColor.AQUA))
                 .append(Component.newline())
-                .color(NamedTextColor.DARK_PURPLE)
+                .color(NamedTextColor.BLUE)
                 .append(Component.text("--------------------------------------------"));
         return component;
     }
@@ -68,6 +90,7 @@ public class EventPassModule extends Module {
     private MySQLDatabase mySQLDatabase;
     private EventPassDAO dao;
     private List<EventPassReward> eventPassRewards;
+
 
     public void awardXP(EventPlayer player, int amount, Audience audience, String reason){
         EventPassPlayer eventPassPlayer = dao.getOrCreateEventPass(player);

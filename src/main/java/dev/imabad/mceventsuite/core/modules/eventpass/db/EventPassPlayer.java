@@ -1,6 +1,7 @@
 package dev.imabad.mceventsuite.core.modules.eventpass.db;
 
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
+import dev.imabad.mceventsuite.core.modules.eventpass.EventPassModule;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -49,7 +50,7 @@ public class EventPassPlayer implements Serializable {
     }
 
     public int levelFromXP(int xp){
-        return (int) Math.floor(xp / 1000);
+        return EventPassModule.levelFromExperience(xp);
     }
 
     public boolean addXP(int xp){
