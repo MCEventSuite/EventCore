@@ -8,14 +8,10 @@ import dev.imabad.mceventsuite.core.modules.mysql.PropertyMapConverter;
 import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
 import dev.imabad.mceventsuite.core.util.PropertyMap;
 import java.io.Serializable;
-import jdk.nashorn.internal.runtime.Property;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "players")
@@ -33,6 +29,8 @@ public class EventPlayer implements Serializable {
     private String lastUsername;
     private EventRank rank;
     private List<String> permissions;
+    private Set<EventPlayerYear> attendance;
+
     private PropertyMap properties = defaultProperties;
 
     protected EventPlayer(){}
@@ -80,6 +78,15 @@ public class EventPlayer implements Serializable {
 
     public void setRank(EventRank rank) {
         this.rank = rank;
+    }
+
+    @OneToMany
+    public Set<EventPlayerYear> getAttendance() {
+        return attendance;
+    }
+
+    public void setAttendance(Set<EventPlayerYear> attendance) {
+        this.attendance = attendance;
     }
 
     @ElementCollection
