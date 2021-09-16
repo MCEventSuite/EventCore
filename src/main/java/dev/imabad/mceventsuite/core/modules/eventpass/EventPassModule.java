@@ -58,7 +58,7 @@ public class EventPassModule extends Module {
                         .append(Component.text("XP"))
                         .color(NamedTextColor.GOLD)
                         .decorate(TextDecoration.BOLD)
-                )
+                ).append(Component.newline())
                 .append(Component.text(reason)
                         .color(NamedTextColor.LIGHT_PURPLE))
                 .append(Component.newline());
@@ -67,6 +67,7 @@ public class EventPassModule extends Module {
     public static Component levelUp(int newLevel, EventPassReward unlocked){
         Component component = Component.text("--------------------------------------------")
                 .color(NamedTextColor.BLUE)
+                .append(Component.newline())
                 .append(Component.newline())
                 .append(Component.text("LEVEL UP!").decorate(TextDecoration.BOLD).color(NamedTextColor.YELLOW))
                 .append(Component.text(" You reached Event Pass").color(NamedTextColor.LIGHT_PURPLE))
@@ -82,6 +83,7 @@ public class EventPassModule extends Module {
                 .append(Component.text("Click here").color(NamedTextColor.GREEN).decorate(TextDecoration.UNDERLINED).clickEvent(ClickEvent.openUrl("https://pass.cubedcon.com")))
                 .append(Component.text(" to view the Event Pass rewards online").color(NamedTextColor.AQUA))
                 .append(Component.newline())
+                .append(Component.newline())
                 .color(NamedTextColor.BLUE)
                 .append(Component.text("--------------------------------------------"));
         return component;
@@ -91,12 +93,16 @@ public class EventPassModule extends Module {
     private EventPassDAO dao;
     private List<EventPassReward> eventPassRewards;
 
-
     public void awardXP(EventPlayer player, int amount, Audience audience, String reason){
+        awardXP(player, amount, audience, reason, true);
+    }
+
+    public void awardXP(EventPlayer player, int amount, Audience audience, String reason, boolean sendMessage){
         EventPassPlayer eventPassPlayer = dao.getOrCreateEventPass(player);
         boolean wentUpLevel = eventPassPlayer.addXP(amount);
         dao.saveEventPassPlayer(eventPassPlayer);
-        audience.sendMessage(EventPassModule.xpGiven(amount, reason));
+        if(sendMessage)
+            audience.sendMessage(EventPassModule.xpGiven(amount, reason));
         if(wentUpLevel){
             int newLevel = eventPassPlayer.levelFromXP();
             Optional<EventPassReward> eventPassRewards = getEventPassRewards().stream().filter(eventPassReward -> eventPassReward.getRequiredLevel() == newLevel).findFirst();

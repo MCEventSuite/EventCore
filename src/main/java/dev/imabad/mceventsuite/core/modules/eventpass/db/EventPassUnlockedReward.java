@@ -2,6 +2,7 @@ package dev.imabad.mceventsuite.core.modules.eventpass.db;
 
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.ManyToAny;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Date;
 @Table(name = "eventpass_unlocked_rewards")
 public class EventPassUnlockedReward {
 
+    private int id;
     private EventPlayer player;
     private EventPassReward unlockedReward;
     @CreationTimestamp
@@ -23,8 +25,16 @@ public class EventPassUnlockedReward {
     }
 
     @Id
-    @OneToOne
-    @JoinColumn(name="player", referencedColumnName = "uuid")
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @ManyToOne(targetEntity = EventPlayer.class)
     public EventPlayer getPlayer() {
         return player;
     }
@@ -33,8 +43,7 @@ public class EventPassUnlockedReward {
         this.player = player;
     }
 
-    @OneToOne
-    @JoinColumn(name="unlockedReward", referencedColumnName = "id")
+    @ManyToOne(targetEntity = EventPassReward.class)
     public EventPassReward getUnlockedReward() {
         return unlockedReward;
     }

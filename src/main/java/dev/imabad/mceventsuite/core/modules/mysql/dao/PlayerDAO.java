@@ -1,6 +1,10 @@
 package dev.imabad.mceventsuite.core.modules.mysql.dao;
 
+import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
+import dev.imabad.mceventsuite.core.api.objects.EventPlayerYear;
+import dev.imabad.mceventsuite.core.api.objects.EventYear;
+import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassUnlockedReward;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -17,6 +21,35 @@ public class PlayerDAO extends DAO {
         super(mySQLDatabase);
     }
 
+    public EventYear getCurrentYear(){
+        try (Session session = mySQLDatabase.getSession()) {
+            Query<EventYear> q= session.createQuery("select p FROM EventYear p Where p.year = :year", EventYear.class);
+            q.setParameter("year", EventCore.getInstance().getConfig().getCurrentYearAsInt());
+            try {
+                return q.getSingleResult();
+            } catch (NoResultException e) {
+                return null;
+            }
+        }
+    }
+
+    public void saveEventPlayerYear(EventPlayerYear eventPlayerYear){
+        Session session = mySQLDatabase.getSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.saveOrUpdate(eventPlayerYear);
+            tx.commit();
+        }
+        catch (RuntimeException e) {
+            tx.rollback();
+            e.printStackTrace();
+        }
+        finally {
+            session.close();
+        }
+    }
+
     /**
      * Get all players
      * @return  A list of players
@@ -24,7 +57,7 @@ public class PlayerDAO extends DAO {
      */
     public List<EventPlayer> getPlayers(){
         try (Session session = mySQLDatabase.getSession()) {
-            Query<EventPlayer> q= session.createQuery("select p FROM EventPlayer p LEFT JOIN FETCH p.permissions e", EventPlayer.class);
+            Query<EventPlayer> q= session.createQuery("select p FROM EventPlayer p LEFT JOIN FETCH p.permissions LEFT JOIN FETCH p.attendance", EventPlayer.class);
             try {
                 return q.getResultList();
             } catch (NoResultException e) {
@@ -68,7 +101,7 @@ public class PlayerDAO extends DAO {
      */
     public EventPlayer getPlayer(UUID uuid){
         try (Session session = mySQLDatabase.getSession()) {
-            Query<EventPlayer> q= session.createQuery("select p FROM EventPlayer p LEFT JOIN FETCH p.permissions e WHERE p.UUID = :uuid", EventPlayer.class);
+            Query<EventPlayer> q= session.createQuery("select p FROM EventPlayer p LEFT JOIN FETCH p.permissions LEFT JOIN FETCH p.attendance WHERE p.UUID = :uuid", EventPlayer.class);
             q.setParameter("uuid", uuid);
             try {
                 return q.getSingleResult();
@@ -89,7 +122,7 @@ public class PlayerDAO extends DAO {
     public EventPlayer getPlayer(String username){
         try(Session session = mySQLDatabase.getSession()) {
             System.out.println("Checking for player with username: " + username);
-            Query<EventPlayer> q = session.createQuery("select p FROM EventPlayer p LEFT JOIN FETCH p.permissions e WHERE p.lastUsername = :username",
+            Query<EventPlayer> q = session.createQuery("select p FROM EventPlayer p LEFT JOIN FETCH p.permissions LEFT JOIN FETCH p.attendance WHERE p.lastUsername = :username ",
                     EventPlayer.class);
             q.setParameter("username", username);
             try {

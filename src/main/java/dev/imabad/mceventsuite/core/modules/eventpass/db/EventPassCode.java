@@ -9,6 +9,7 @@ public class EventPassCode {
 
     @Id
     private String name;
+    @OneToOne(targetEntity = EventPassReward.class)
     private EventPassReward reward;
 
     protected EventPassCode() {
@@ -27,8 +28,7 @@ public class EventPassCode {
         this.name = name;
     }
 
-    @OneToOne
-    @JoinColumn(name="reward", referencedColumnName = "id")
+//    @JoinColumn(name="reward", referencedColumnName = "id")
     public EventPassReward getReward() {
         return reward;
     }

@@ -15,6 +15,13 @@ public class EventPlayerYear {
 
     protected EventPlayerYear() {}
 
+    public EventPlayerYear(EventPlayer player, EventYear year, String rank) {
+        this.id = UUID.randomUUID();
+        this.year = year;
+        this.player = player;
+        this.rank = rank;
+    }
+
     @Id
     @Column(name="id", unique = true, nullable = false)
     @org.hibernate.annotations.Type(type="uuid-char")
@@ -26,8 +33,8 @@ public class EventPlayerYear {
         this.id = uuid;
     }
 
-    @OneToOne
-    @JoinColumn(name="year", referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name="year", referencedColumnName = "year")
     public EventYear getYear() {
         return year;
     }
@@ -36,7 +43,7 @@ public class EventPlayerYear {
         this.year = eventYear;
     }
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="player", referencedColumnName = "uuid")
     public EventPlayer getPlayer() {
         return player;

@@ -11,6 +11,7 @@ import org.hibernate.query.Query;
 import javax.persistence.NoResultException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class EventPassDAO extends DAO {
 
@@ -85,6 +86,25 @@ public class EventPassDAO extends DAO {
 
     public List<EventPassReward> getUnlockedRewards(EventPassPlayer player) {
         return getUnlockedRewards(player.getPlayer());
+    }
+
+    public void saveUnlockedRewardBatch(Set<EventPassUnlockedReward> eventPassUnlockedReward){
+        Session session = mySQLDatabase.getSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            for(EventPassUnlockedReward reward : eventPassUnlockedReward) {
+                session.saveOrUpdate(reward);
+            }
+            tx.commit();
+        }
+        catch (RuntimeException e) {
+            tx.rollback();
+            e.printStackTrace();
+        }
+        finally {
+            session.close();
+        }
     }
 
     public void saveUnlockedReward(EventPassUnlockedReward eventPassUnlockedReward){

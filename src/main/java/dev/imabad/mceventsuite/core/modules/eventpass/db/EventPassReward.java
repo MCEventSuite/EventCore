@@ -9,6 +9,7 @@ import java.util.UUID;
 @Table(name = "eventpass_rewards")
 public class EventPassReward {
 
+    @Id
     private String id;
     private String name;
     private String description;

@@ -81,6 +81,7 @@ public class EventPlayer implements Serializable {
     }
 
     @OneToMany
+    @JoinColumn(name="player", referencedColumnName = "uuid")
     public Set<EventPlayerYear> getAttendance() {
         return attendance;
     }
