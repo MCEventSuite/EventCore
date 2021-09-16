@@ -68,12 +68,6 @@ public class RedisConnection extends DatabaseProvider {
     public void startSubscriberThread(){
         this.redisSubscriberThread = new Thread(new RedisSubscriberThread(subscriber, config));
         this.redisSubscriberThread.setUncaughtExceptionHandler((t, e) -> {
-            System.out.println("==============================================");
-            System.out.println("==============================================");
-            System.out.println("Redis subscriber thread crashed - restarting");
-            System.out.println("==============================================");
-            System.out.println("==============================================");
-            e.printStackTrace();
             startSubscriberThread();
         });
         this.redisSubscriberThread.start();
