@@ -125,4 +125,15 @@ public class EventPassDAO extends DAO {
         }
     }
 
+    public EventPassCode getCode(String code) {
+        Session session = mySQLDatabase.getSession();
+        try {
+            Query<EventPassCode> query = session.createQuery("select r from EventPassCode r where r.name = :code", EventPassCode.class);
+            query.setParameter("code", code);
+            return query.getSingleResult();
+        } finally {
+            session.close();
+        }
+    }
+
 }
