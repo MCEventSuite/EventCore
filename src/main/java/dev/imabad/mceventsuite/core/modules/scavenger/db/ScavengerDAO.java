@@ -9,6 +9,7 @@ import org.hibernate.mapping.TypeDef;
 import org.hibernate.query.Query;
 
 import javax.persistence.NoResultException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +36,8 @@ public class ScavengerDAO extends DAO {
             Query<ScavengerHuntPlayer> query = session.createQuery("select r from ScavengerHuntPlayer r LEFT JOIN FETCH r.foundLocations WHERE r.player = :player", ScavengerHuntPlayer.class);
             query.setParameter("player", eventPlayer);
             return query.getSingleResult().getFoundLocations();
+        } catch(NoResultException noResultException) {
+            return Collections.emptySet();
         } finally {
             session.close();
         }

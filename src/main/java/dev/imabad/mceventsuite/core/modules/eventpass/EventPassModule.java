@@ -105,13 +105,15 @@ public class EventPassModule extends Module {
             audience.sendMessage(EventPassModule.xpGiven(amount, reason));
         if(wentUpLevel){
             int newLevel = eventPassPlayer.levelFromXP();
-            Optional<EventPassReward> eventPassRewards = getEventPassRewards().stream().filter(eventPassReward -> eventPassReward.getRequiredLevel() == newLevel).findFirst();
-            eventPassRewards.ifPresent(reward -> {
+            List<EventPassReward> unlockedRewards = dao.getUnlockedRewards(player).stream().map(EventPassUnlockedReward::getUnlockedReward).collect(Collectors.toList());
+            List<EventPassReward> rewards = getEventPassRewards().stream().filter(eventPassReward -> eventPassReward.getRequiredLevel() > 0 && eventPassReward.getRequiredLevel() <= newLevel && !unlockedRewards.contains(eventPassReward)).sorted(Comparator.comparingInt(EventPassReward::getRequiredLevel)).collect(Collectors.toList());
+            for(EventPassReward reward : rewards) {
                 EventPassUnlockedReward unlockedReward = new EventPassUnlockedReward(reward, player);
                 dao.saveUnlockedReward(unlockedReward);
-            });
+            }
+            EventPassReward rewardForMessage = rewards.size() > 0 ? rewards.get(rewards.size() - 1) : null;
             Component message;
-            message = eventPassRewards.map(eventPassReward -> EventPassModule.levelUp(newLevel, eventPassReward)).orElseGet(() -> EventPassModule.levelUp(newLevel, null));
+            message = EventPassModule.levelUp(newLevel, rewardForMessage);
             audience.sendMessage(message);
             EventCore.getInstance().getModuleRegistry().getModule(RedisModule.class).publishMessage(RedisChannel.GLOBAL, new UpdatePlayerXPMessage(player.getUUID(), newLevel));
         }
@@ -129,6 +131,7 @@ public class EventPassModule extends Module {
             dao = new EventPassDAO(mySQLDatabase);
             mySQLDatabase.registerDAOs(dao);
             eventPassRewards = dao.getRewards(EventCore.getInstance().getConfig().getCurrentYearAsInt());
+            System.out.println("Loaded " + eventPassRewards.size() + " rewards for current year!");
         });
     }
 

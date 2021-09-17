@@ -57,17 +57,17 @@ public class ScavengerModule extends Module {
                 .color(NamedTextColor.BLUE)
                 .append(Component.newline())
                 .append(Component.newline())
-                .append(Component.text("+").append(Component.text(xp)).append(Component.text("XP")).color(NamedTextColor.GOLD))
+                .append(Component.text("+").append(Component.text(xp)).append(Component.text("XP")).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
                 .append(Component.newline())
                 .append(Component.newline())
-                .append(Component.text(" You found the ").color(NamedTextColor.LIGHT_PURPLE))
+                .append(Component.text("You found the ").color(NamedTextColor.LIGHT_PURPLE))
                 .append(Component.text(cardName).color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD))
                 .append(Component.text(" card! ").color(NamedTextColor.LIGHT_PURPLE))
                 .append(Component.newline())
                 .append(Component.text("It was added to your collection.").color(NamedTextColor.LIGHT_PURPLE))
                 .append(Component.newline())
                 .append(Component.newline())
-                .append(Component.text(" Click here").color(NamedTextColor.GREEN).decorate(TextDecoration.UNDERLINED).clickEvent(ClickEvent.openUrl("https://pass.cubedcon.com")))
+                .append(Component.text("Click here").color(NamedTextColor.GREEN).decorate(TextDecoration.UNDERLINED).clickEvent(ClickEvent.openUrl("https://pass.cubedcon.com")))
                 .append(Component.text(" to view the Event Pass rewards online").color(NamedTextColor.AQUA))
                 .append(Component.newline())
                 .append(Component.newline())
@@ -80,7 +80,8 @@ public class ScavengerModule extends Module {
             Set<ScavengerLocation> foundLocations = dao.getPlayerFoundLocations(player);
             ScavengerHuntPlayer scavengerHuntPlayer = dao.getOrCreateScavengerHuntPlayer(player);
             if(foundLocations.stream().noneMatch(location -> location.getName().equals(scavengerLocation.getName()))){
-                scavengerHuntPlayer.getFoundLocations().add(scavengerLocation);
+                foundLocations.add(scavengerLocation);
+                scavengerHuntPlayer.setFoundLocations(foundLocations);
                 dao.saveScavengerHuntPlayer(scavengerHuntPlayer);
                 int total = getLocations().size();
                 Component mainTitle = Component.text("You found a card!").color(NamedTextColor.GREEN);
