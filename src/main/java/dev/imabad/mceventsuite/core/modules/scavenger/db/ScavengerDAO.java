@@ -32,7 +32,6 @@ public class ScavengerDAO extends DAO {
     public Set<ScavengerLocation> getPlayerFoundLocations(EventPlayer eventPlayer){
         Session session = mySQLDatabase.getSession();
         try {
-            Set<ScavengerLocation> locations = new HashSet<>();
             Query<ScavengerHuntPlayer> query = session.createQuery("select r from ScavengerHuntPlayer r LEFT JOIN FETCH r.foundLocations WHERE r.player = :player", ScavengerHuntPlayer.class);
             query.setParameter("player", eventPlayer);
             return query.getSingleResult().getFoundLocations();

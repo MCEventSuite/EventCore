@@ -73,10 +73,10 @@ public class EventPassDAO extends DAO {
         }
     }
 
-    public List<EventPassReward> getUnlockedRewards(EventPlayer player) {
+    public List<EventPassUnlockedReward> getUnlockedRewards(EventPlayer player) {
         Session session = mySQLDatabase.getSession();
         try {
-            Query<EventPassReward> query = session.createQuery("select r from EventPassUnlockedReward r WHERE r.player = :player", EventPassReward.class);
+            Query<EventPassUnlockedReward> query = session.createQuery("select r from EventPassUnlockedReward r WHERE r.player = :player", EventPassUnlockedReward.class);
             query.setParameter("player", player);
             return query.list();
         } finally {
@@ -84,7 +84,7 @@ public class EventPassDAO extends DAO {
         }
     }
 
-    public List<EventPassReward> getUnlockedRewards(EventPassPlayer player) {
+    public List<EventPassUnlockedReward> getUnlockedRewards(EventPassPlayer player) {
         return getUnlockedRewards(player.getPlayer());
     }
 

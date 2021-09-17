@@ -79,8 +79,8 @@ public class ScavengerModule extends Module {
         EventCore.getInstance().getEventPlayerManager().getPlayer(uuid).ifPresent(player -> {
             Set<ScavengerLocation> foundLocations = dao.getPlayerFoundLocations(player);
             ScavengerHuntPlayer scavengerHuntPlayer = dao.getOrCreateScavengerHuntPlayer(player);
-            if(foundLocations.add(scavengerLocation)){
-                scavengerHuntPlayer.setFoundLocations(foundLocations);
+            if(foundLocations.stream().noneMatch(location -> location.getName().equals(scavengerLocation.getName()))){
+                scavengerHuntPlayer.getFoundLocations().add(scavengerLocation);
                 dao.saveScavengerHuntPlayer(scavengerHuntPlayer);
                 int total = getLocations().size();
                 Component mainTitle = Component.text("You found a card!").color(NamedTextColor.GREEN);
