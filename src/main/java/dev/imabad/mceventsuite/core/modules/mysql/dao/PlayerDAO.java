@@ -88,6 +88,10 @@ public class PlayerDAO extends DAO {
                 }
             }
         }
+        if(!eventPlayer.getLastUsername().equals(username)){
+            eventPlayer.setLastUsername(username);
+            saveOrUpdatePlayer(eventPlayer);
+        }
         return eventPlayer;
     }
 
