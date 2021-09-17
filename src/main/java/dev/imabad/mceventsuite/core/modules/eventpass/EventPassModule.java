@@ -31,6 +31,7 @@ public class EventPassModule extends Module {
     private static final HashMap<Integer, Integer> LEVELS = new HashMap<>();
 
     static {
+        LEVELS.put(0, 0);
         for(int i = 1; i < 51; i++) {
             int xp = experience(i);
             LEVELS.put(xp, i);
@@ -38,6 +39,9 @@ public class EventPassModule extends Module {
     }
 
     public static int experience(int level){
+        if(level == 0){
+            return 0;
+        }
         if(level == 1){
             return 500;
         }
@@ -47,8 +51,8 @@ public class EventPassModule extends Module {
     }
 
     public static int levelFromExperience(int experience) {
-        return LEVELS.get(LEVELS.keySet().stream().min(Comparator.comparingInt(i -> Math.abs(i - experience)))
-                .orElse(-1));
+        return LEVELS.get(LEVELS.keySet().stream().min(Comparator.comparingInt(i -> i > experience ? Integer.MAX_VALUE : Math.abs(i - experience)))
+                .orElse(0));
     }
 
     public static Component xpGiven(int amount, String reason){

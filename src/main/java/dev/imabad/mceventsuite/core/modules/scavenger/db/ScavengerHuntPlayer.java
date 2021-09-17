@@ -33,7 +33,7 @@ public class ScavengerHuntPlayer implements Serializable {
         this.player = player;
     }
 
-    @OneToMany(targetEntity = ScavengerLocation.class)
+    @ManyToMany(targetEntity = ScavengerLocation.class)
     public Set<ScavengerLocation> getFoundLocations() {
         return foundLocations;
     }
