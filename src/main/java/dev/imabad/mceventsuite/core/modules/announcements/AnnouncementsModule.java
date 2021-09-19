@@ -27,23 +27,7 @@ public class AnnouncementsModule extends Module {
         EventCore.getInstance().getEventRegistry().registerListener(MySQLLoadedEvent.class, mySQLLoadedEvent -> {
             dao = new ScheduledAnnouncementDAO(mySQLDatabase);
             mySQLDatabase.registerDAOs(dao);
-
-            for (ScheduledAnnouncement announcement : dao.getAllScheduledAnnouncements()) {
-                // Skip over any missed broadcasts
-                if (announcement.getNextRun() < System.currentTimeMillis()) {
-                    double missedAnnouncements = (System.currentTimeMillis() - announcement.getNextRun())
-                                    / announcement.getInterval();
-                    announcement.setNextRun(announcement.getNextRun()
-                            + Math.round(Math.ceil(missedAnnouncements) * announcement.getInterval()));
-                    dao.saveOrUpdateScheduledAnnouncement(announcement);
-                }
-
-                announcements.add(announcement);
-            }
-
-            if (announcements.peek() != null) {
-                System.out.println("Next announcement scheduled for: " + new Date(announcements.peek().getNextRun()));
-            }
+            reloadAnnouncements();
         });
     }
 
@@ -59,6 +43,27 @@ public class AnnouncementsModule extends Module {
 
     public PriorityQueue<ScheduledAnnouncement> getAnnouncements() {
         return this.announcements;
+    }
+
+    public void reloadAnnouncements() {
+        announcements.clear();
+
+        for (ScheduledAnnouncement announcement : dao.getAllScheduledAnnouncements()) {
+            // Skip over any missed broadcasts
+            if (announcement.getNextRun() < System.currentTimeMillis()) {
+                double missedAnnouncements = (System.currentTimeMillis() - announcement.getNextRun())
+                        / announcement.getInterval();
+                announcement.setNextRun(announcement.getNextRun()
+                        + Math.round(Math.ceil(missedAnnouncements) * announcement.getInterval()));
+                dao.saveOrUpdateScheduledAnnouncement(announcement);
+            }
+
+            announcements.add(announcement);
+        }
+
+        if (announcements.peek() != null) {
+            System.out.println("Next announcement scheduled for: " + new Date(announcements.peek().getNextRun()));
+        }
     }
 
     protected ScheduledAnnouncementDAO getDao() {
