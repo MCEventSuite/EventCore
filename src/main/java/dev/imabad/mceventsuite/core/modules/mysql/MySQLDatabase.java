@@ -68,9 +68,9 @@ public class MySQLDatabase extends DatabaseProvider {
         Properties prop= new Properties();
 
         String connectionString = mySQLConfig.getPort() != 0
-            ? String.format("jdbc:mysql://%s:%d/%s", mySQLConfig.getHostname(), mySQLConfig.getPort(),
+            ? String.format("jdbc:mysql://%s:%d/%s?autoReconnect=true", mySQLConfig.getHostname(), mySQLConfig.getPort(),
                 mySQLConfig.getDatabase())
-            : String.format("jdbc:mysql://%s/%s", mySQLConfig.getHostname(), mySQLConfig.getDatabase());
+            : String.format("jdbc:mysql://%s/%s?autoReconnect=true", mySQLConfig.getHostname(), mySQLConfig.getDatabase());
 
         prop.setProperty("hibernate.connection.url", connectionString);
 
