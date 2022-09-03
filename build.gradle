@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'dev.imabad.mceventsuite'
-version '1.0'
+version '1.0-SNAPSHOT'
 
 java {
     toolchain {
@@ -41,7 +41,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'dev.imabad.mceventsuite'
             artifactId = 'eventcore'
-            version = '1.0'
+            version = '1.0-SNAPSHOT'
 
             from components.java
         }
