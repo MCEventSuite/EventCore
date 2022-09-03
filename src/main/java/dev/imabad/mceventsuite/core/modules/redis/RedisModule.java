@@ -112,58 +112,40 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
         if(config.isVerboseLogging()){
             System.out.println("[EventCore|Redis] Sending message to channel " + channel.name() + ": " + messageJSON);
         }
-        try(Jedis jedis = redisConnection.getConnection()) {
-            jedis.publish(channel.name(), messageJSON);
-        }
+        redisConnection.getConnection().publish(channel.name(), messageJSON);
     }
 
     public void storeData(String key, String value){
-        try(Jedis jedis = redisConnection.getConnection()){
-            jedis.set(key, value);
-        }
+        redisConnection.getConnection().set(key, value);
     }
 
     public void storeData(String key, String value, int expires, TimeUnit timeUnit){
-        try(Jedis jedis = redisConnection.getConnection()){
-            jedis.set(key, value, SetParams.setParams().ex((int)timeUnit.toSeconds(expires)));
-        }
+        redisConnection.getConnection().set(key, value, SetParams.setParams().ex((int)timeUnit.toSeconds(expires)));
     }
 
     public boolean existsData(String key){
-        try(Jedis jedis = redisConnection.getConnection()){
-            return jedis.exists(key);
-        }
+        return redisConnection.getConnection().exists(key);
     }
 
     public String getData(String key){
-        try(Jedis jedis = redisConnection.getConnection()){
-            return jedis.get(key);
-        }
+        return redisConnection.getConnection().get(key);
     }
 
     public void removeData(String key){
-        try(Jedis jedis = redisConnection.getConnection()){
-            jedis.del(key);
-        }
+        redisConnection.getConnection().del(key);
     }
 
     public int hashCount(String key){
-        try(Jedis jedis = redisConnection.getConnection()){
-            return jedis.hlen(key).intValue();
-        }
+        return (int) redisConnection.getConnection().hlen(key);
     }
 
     public <T> Set<T> hashList(String key, Class<T> clazz){
-        try(Jedis jedis = redisConnection.getConnection()){
-            Map<String, String> encodedPlayers = jedis.hgetAll(key);
-            return encodedPlayers.values().stream().map(s -> GsonUtils.getGson().fromJson(s, clazz)).collect(Collectors.toSet());
-        }
+        Map<String, String> encodedPlayers = redisConnection.getConnection().hgetAll(key);
+        return encodedPlayers.values().stream().map(s -> GsonUtils.getGson().fromJson(s, clazz)).collect(Collectors.toSet());
     }
 
     public void addToHash(String hashKey, String key, String value){
-        try(Jedis jedis = redisConnection.getConnection()){
-            jedis.hset(hashKey, key, value);
-        }
+        redisConnection.getConnection().hset(hashKey, key, value);
     }
 
     public void addToHash(String hashKey, String key, Object value){
@@ -171,21 +153,15 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
     }
 
     public void removeFromHash(String hashKey, String key){
-        try(Jedis jedis = redisConnection.getConnection()){
-            jedis.hdel(hashKey, key);
-        }
+        redisConnection.getConnection().hdel(hashKey, key);
     }
 
     public boolean existsInHash(String hashKey, String key){
-        try(Jedis jedis = redisConnection.getConnection()){
-            return jedis.hexists(hashKey, key);
-        }
+        return redisConnection.getConnection().hexists(hashKey, key);
     }
 
     public <T> T getFromHash(String hashKey, String value, Class<T> clazz){
-        try(Jedis jedis = redisConnection.getConnection()){
-            return GsonUtils.getGson().fromJson(jedis.hget(hashKey, value), clazz);
-        }
+        return GsonUtils.getGson().fromJson(redisConnection.getConnection().hget(hashKey, value), clazz);
     }
 
     public MutedPlayersManager getMutedPlayersManager() {

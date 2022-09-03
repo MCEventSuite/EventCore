@@ -5,15 +5,13 @@ import dev.imabad.mceventsuite.core.api.database.DatabaseProvider;
 import dev.imabad.mceventsuite.core.api.database.DatabaseType;
 import dev.imabad.mceventsuite.core.config.database.RedisConfig;
 import dev.imabad.mceventsuite.core.modules.redis.events.RedisConnectionEvent;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.*;
 
 public class RedisConnection extends DatabaseProvider {
 
     private RedisConfig config;
-    private JedisPool connection;
-    private Jedis subscriber;
+    private JedisPooled connection;
+    private JedisPooled subscriber;
     private Thread redisSubscriberThread;
 
     public RedisConnection(RedisConfig config) {
@@ -37,13 +35,11 @@ public class RedisConnection extends DatabaseProvider {
 
     @Override
     public void connect() {
-        subscriber = new Jedis(config.getHostname(), config.getPort());
-        subscriber.connect();
+        subscriber = new JedisPooled(new ConnectionPoolConfig(), config.getHostname(), config.getPort(), 2000, config.getPassword(), Integer.parseInt(config.getDatabase()));
         if(config.getPassword().length() > 0){
-            connection = new JedisPool(new JedisPoolConfig(), config.getHostname(), config.getPort(),2000, config.getPassword(), Integer.parseInt(config.getDatabase()));
-            subscriber.auth(config.getPassword());
+            connection = new JedisPooled(new ConnectionPoolConfig(), config.getHostname(), config.getPort(), 2000, config.getPassword(), Integer.parseInt(config.getDatabase()));
         } else {
-            connection = new JedisPool(new JedisPoolConfig(), config.getHostname(), config.getPort(), 2000, null, Integer.parseInt(config.getDatabase()));
+            connection = new JedisPooled(new ConnectionPoolConfig(), config.getHostname(), config.getPort(), 2000, null, Integer.parseInt(config.getDatabase()));
         }
         startSubscriberThread();
         EventCore.getInstance().getEventRegistry().handleEvent(new RedisConnectionEvent());
@@ -55,8 +51,8 @@ public class RedisConnection extends DatabaseProvider {
         subscriber.close();
     }
 
-    public Jedis getConnection() {
-        return this.connection.getResource();
+    public JedisPooled getConnection() {
+        return this.connection;
     }
 
     public void stopThread(){
