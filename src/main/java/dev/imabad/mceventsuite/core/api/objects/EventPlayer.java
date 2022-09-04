@@ -24,6 +24,7 @@ public class EventPlayer implements Serializable {
         defaultProperties.put(name, defaultValue);
     }
 
+    @org.hibernate.annotations.Type(type="uuid-char")
     private UUID uuid;
     private String lastUsername;
     private EventRank rank;
@@ -51,6 +52,7 @@ public class EventPlayer implements Serializable {
 
     @Id
     @Column(name="uuid", unique = true, nullable = false)
+    @org.hibernate.annotations.Type(type="uuid-char")
     public UUID getUUID() {
         return uuid;
     }

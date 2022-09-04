@@ -7,6 +7,7 @@ import java.util.UUID;
 @Table(name = "player_years")
 public class EventPlayerYear {
 
+    @org.hibernate.annotations.Type(type="uuid-char")
     private UUID id;
     private EventYear year;
     private EventPlayer player;
@@ -23,6 +24,7 @@ public class EventPlayerYear {
 
     @Id
     @Column(name="id", unique = true, nullable = false)
+    @org.hibernate.annotations.Type(type="uuid-char")
     public UUID getId() {
         return id;
     }
