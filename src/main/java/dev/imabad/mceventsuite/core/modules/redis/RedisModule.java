@@ -1,5 +1,7 @@
 package dev.imabad.mceventsuite.core.modules.redis;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.IConfigProvider;
 import dev.imabad.mceventsuite.core.api.modules.Module;
@@ -14,6 +16,8 @@ import redis.clients.jedis.params.SetParams;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class RedisModule extends Module implements IConfigProvider<RedisConfig> {
@@ -22,8 +26,12 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
     private RedisConnection redisConnection;
     private Thread redisThread;
     private HashMap<Class<? extends RedisBaseMessage>, List<RedisMessageListener>> registeredListeners = new HashMap<>();
+    private HashMap<Class<? extends RedisBaseMessage>, List<RedisRequestListener>> requestListeners = new HashMap<>();
     private MutedPlayersManager mutedPlayersManager;
     private RedisPlayerManager redisPlayerManager;
+
+    private Cache<String, Consumer<RedisBaseMessage>> requests = CacheBuilder.newBuilder()
+            .expireAfterWrite(1, TimeUnit.MINUTES).build();
 
     @Override
     public Class<RedisConfig> getConfigType() {
@@ -94,7 +102,34 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
         }
     }
 
-    protected <T extends RedisBaseMessage> void handleMessage(T message){
+    public <T extends RedisBaseMessage, K extends RedisBaseMessage> void registerRequestListener(Class<T> message, RedisRequestListener<T, K> listener) {
+        if(this.requestListeners.containsKey(message)){
+            this.requestListeners.get(message).add(listener);
+        } else {
+            this.requestListeners.put(message, Collections.singletonList(listener));
+        }
+    }
+
+    protected <T extends RedisBaseMessage, K extends RedisBaseMessage> void handleMessage(T message){
+        if(message.getResponseId() != null) {
+            final Consumer<RedisBaseMessage> consumer = this.requests.getIfPresent(message.getResponseId());
+            if(consumer != null) {
+                consumer.accept(message);
+                return;
+            }
+        }
+
+        if(message.getRequestId() != null) {
+            if(!this.requestListeners.containsKey(message.getClass()))
+                return;
+            for(RedisRequestListener function : this.requestListeners.get(message.getClass())) {
+                RedisBaseMessage response = function.execute(message);
+                response.setResponseId(message.getRequestId());
+                this.publishMessage(RedisChannel.GLOBAL, response);
+                return;
+            }
+        }
+
         if(this.registeredListeners.containsKey(message.getClass())){
             this.registeredListeners.get(message.getClass()).forEach(redisMessageListener -> redisMessageListener.execute(message));
         }
@@ -113,6 +148,11 @@ public class RedisModule extends Module implements IConfigProvider<RedisConfig> 
             System.out.println("[EventCore|Redis] Sending message to channel " + channel.name() + ": " + messageJSON);
         }
         redisConnection.getConnection().publish(channel.name(), messageJSON);
+    }
+
+    public void publishRequest(RedisChannel channel, RedisBaseMessage request, Consumer<RedisBaseMessage> consumer) {
+        this.requests.put(request.setAsRequest(), consumer);
+        this.publishMessage(channel, request);
     }
 
     public void storeData(String key, String value){
