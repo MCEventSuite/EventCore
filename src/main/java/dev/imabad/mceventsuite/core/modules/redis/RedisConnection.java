@@ -35,7 +35,8 @@ public class RedisConnection extends DatabaseProvider {
 
     @Override
     public void connect() {
-        subscriber = new JedisPooled(new ConnectionPoolConfig(), config.getHostname(), config.getPort(), 2000, config.getPassword(), Integer.parseInt(config.getDatabase()));
+        subscriber = new JedisPooled(new ConnectionPoolConfig(), config.getHostname(), config.getPort(), 2000,
+                config.getPassword().length() == 0 ? null : config.getPassword(), Integer.parseInt(config.getDatabase()));
         if(config.getPassword().length() > 0){
             connection = new JedisPooled(new ConnectionPoolConfig(), config.getHostname(), config.getPort(), 2000, config.getPassword(), Integer.parseInt(config.getDatabase()));
         } else {
@@ -64,6 +65,7 @@ public class RedisConnection extends DatabaseProvider {
     public void startSubscriberThread(){
         this.redisSubscriberThread = new Thread(new RedisSubscriberThread(subscriber, config));
         this.redisSubscriberThread.setUncaughtExceptionHandler((t, e) -> {
+            e.printStackTrace();
             startSubscriberThread();
         });
         this.redisSubscriberThread.start();
