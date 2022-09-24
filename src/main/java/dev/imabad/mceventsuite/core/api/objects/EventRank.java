@@ -1,6 +1,8 @@
 package dev.imabad.mceventsuite.core.api.objects;
 
 
+import dev.imabad.mceventsuite.core.util.SpecialTag;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -61,18 +63,38 @@ public class EventRank {
 
     @Column(name = "prefix")
     public String getPrefix() {
-        if(prefix == null){
+        String modifiedPrefix = prefix;
+        if (prefix == null || prefix.isBlank()) {
             return "";
         }
-        return prefix;
+
+        if (prefix.contains("#")) {
+            int pos = prefix.indexOf("#");
+            int end = prefix.indexOf(";");
+            String code = prefix.substring(pos + 1, end);
+            SpecialTag tag = SpecialTag.valueOf(code);
+            modifiedPrefix = "&f" + tag.getJavaString() + prefix.substring(0, pos) + prefix.substring(end + 1);
+        }
+
+        return modifiedPrefix;
     }
 
     @Column(name = "suffix")
     public String getSuffix() {
-        if(suffix == null){
+        String modifiedSuffix = suffix;
+        if (suffix == null || suffix.isBlank()) {
             return "";
         }
-        return suffix;
+
+        if (suffix.contains("#")) {
+            int pos = suffix.indexOf("#");
+            int end = suffix.indexOf(";");
+            String code = suffix.substring(pos + 1, end);
+            SpecialTag tag = SpecialTag.valueOf(code);
+            modifiedSuffix = "&f" + tag.getJavaString() + suffix.substring(0, pos) + suffix.substring(end + 1);
+        }
+
+        return modifiedSuffix;
     }
 
     @ElementCollection(fetch = FetchType.EAGER)
