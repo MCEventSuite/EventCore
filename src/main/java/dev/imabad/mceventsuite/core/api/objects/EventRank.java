@@ -63,38 +63,45 @@ public class EventRank {
 
     @Column(name = "prefix")
     public String getPrefix() {
-        String modifiedPrefix = prefix;
-        if (prefix == null || prefix.isBlank()) {
-            return "";
-        }
+        return prefix;
+    }
+
+    @Column(name = "suffix")
+    public String getSuffix() {
+        return this.suffix;
+    }
+
+    @Transient
+    private String getFormattedPrefix(boolean bedrock) {
+        String modifiedPrefix = this.getPrefix();
 
         if (prefix.contains("#")) {
             int pos = prefix.indexOf("#");
             int end = prefix.indexOf(";");
             String code = prefix.substring(pos + 1, end);
             SpecialTag tag = SpecialTag.valueOf(code);
-            modifiedPrefix = "&f" + tag.getJavaString() + prefix.substring(0, pos) + prefix.substring(end + 1);
+
+            if(tag.getBedrockString().contains("[") && bedrock) {
+                modifiedPrefix = prefix.substring(0, pos) + tag.getBedrockString()
+                        + prefix.substring(end + 1) + " ";
+            } else {
+                modifiedPrefix = "&f" +
+                        (bedrock ? tag.getBedrockString() : tag.getJavaString())
+                        + prefix.substring(0, pos) + prefix.substring(end + 1) + " ";
+            }
         }
 
         return modifiedPrefix;
     }
 
-    @Column(name = "suffix")
-    public String getSuffix() {
-        String modifiedSuffix = suffix;
-        if (suffix == null || suffix.isBlank()) {
-            return "";
-        }
+    @Transient
+    public String getJavaPrefix() {
+        return this.getFormattedPrefix(false);
+    }
 
-        if (suffix.contains("#")) {
-            int pos = suffix.indexOf("#");
-            int end = suffix.indexOf(";");
-            String code = suffix.substring(pos + 1, end);
-            SpecialTag tag = SpecialTag.valueOf(code);
-            modifiedSuffix = "&f" + tag.getJavaString() + suffix.substring(0, pos) + suffix.substring(end + 1);
-        }
-
-        return modifiedSuffix;
+    @Transient
+    public String getBedrockPrefix() {
+        return this.getFormattedPrefix(true);
     }
 
     @ElementCollection(fetch = FetchType.EAGER)

@@ -47,6 +47,9 @@ public enum SpecialTag {
     }
 
     public String getBedrockString() {
+        if(this.bedrock == null || this.bedrock.length == 0) {
+            return "[" + this.name() + "]";
+        }
         return String.valueOf(this.bedrock);
     }
 }
