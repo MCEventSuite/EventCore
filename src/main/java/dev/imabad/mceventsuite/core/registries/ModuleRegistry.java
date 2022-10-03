@@ -33,6 +33,8 @@ public class ModuleRegistry implements IRegistry {
     }
 
     public <T extends Module> void addAndEnableModule(T module){
+        if(modules.containsKey(module.getClass()))
+            return;
         modules.put(module.getClass(), module);
         loadModuleAndDependencies(module);
     }
