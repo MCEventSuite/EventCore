@@ -5,9 +5,10 @@ import dev.imabad.mceventsuite.core.modules.redis.RedisBaseMessage;
 public class DonationMessage extends RedisBaseMessage {
     private String username;
     private Type type;
+    private int amount;
     private boolean plantTree;
 
-    public DonationMessage(String username, Type type, boolean plantTree) {
+    public DonationMessage(String username, Type type, int amount, boolean plantTree) {
         this.username = username;
         this.type = type;
         this.plantTree = plantTree;
@@ -19,6 +20,10 @@ public class DonationMessage extends RedisBaseMessage {
 
     public Type getType() {
         return this.type;
+    }
+
+    public int getAmount() {
+        return this.amount;
     }
 
     public boolean isPlantTree() {
