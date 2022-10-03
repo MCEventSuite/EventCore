@@ -4,12 +4,12 @@ import dev.imabad.mceventsuite.core.modules.redis.RedisBaseMessage;
 
 public class DonationMessage extends RedisBaseMessage {
     private String username;
-    private int amount;
+    private Type type;
     private boolean plantTree;
 
-    public DonationMessage(String username, int amount, boolean plantTree) {
+    public DonationMessage(String username, Type type, boolean plantTree) {
         this.username = username;
-        this.amount = amount;
+        this.type = type;
         this.plantTree = plantTree;
     }
 
@@ -17,11 +17,15 @@ public class DonationMessage extends RedisBaseMessage {
         return this.username;
     }
 
-    public int getAmount() {
-        return this.amount;
+    public Type getType() {
+        return this.type;
     }
 
     public boolean isPlantTree() {
         return this.plantTree;
+    }
+
+    public static enum Type {
+        VIP,VIPP,DONATION;
     }
 }
