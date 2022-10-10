@@ -11,6 +11,7 @@ public class DonationMessage extends RedisBaseMessage {
     public DonationMessage(String username, Type type, int amount, boolean plantTree) {
         this.username = username;
         this.type = type;
+        this.amount = amount;
         this.plantTree = plantTree;
     }
 
