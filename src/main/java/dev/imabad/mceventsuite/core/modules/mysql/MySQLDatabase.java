@@ -73,6 +73,7 @@ public class MySQLDatabase extends DatabaseProvider {
             : String.format("jdbc:mysql://%s/%s?autoReconnect=true", mySQLConfig.getHostname(), mySQLConfig.getDatabase());
 
         prop.setProperty("hibernate.connection.url", connectionString);
+        prop.setProperty("connection.autoReconnect", "true");
 
         //You can use any database you want, I had it configured for Postgres
         prop.setProperty("hibernate.dialect", "org.hibernate.dialect.MariaDB103Dialect");

@@ -14,7 +14,7 @@ public class AnnouncementsModule extends Module {
 
     private MySQLDatabase mySQLDatabase;
     private ScheduledAnnouncementDAO dao;
-    private PriorityQueue<ScheduledAnnouncement> announcements = new PriorityQueue<>();
+    private List<ScheduledAnnouncement> announcements = new ArrayList<>();
 
     @Override
     public String getName() {
@@ -41,7 +41,7 @@ public class AnnouncementsModule extends Module {
         return Arrays.asList(MySQLModule.class);
     }
 
-    public PriorityQueue<ScheduledAnnouncement> getAnnouncements() {
+    public List<ScheduledAnnouncement> getAnnouncements() {
         return this.announcements;
     }
 
@@ -49,20 +49,7 @@ public class AnnouncementsModule extends Module {
         announcements.clear();
 
         for (ScheduledAnnouncement announcement : dao.getAllScheduledAnnouncements()) {
-            // Skip over any missed broadcasts
-            if (announcement.getNextRun() < System.currentTimeMillis()) {
-                double missedAnnouncements = (System.currentTimeMillis() - announcement.getNextRun())
-                        / announcement.getInterval();
-                announcement.setNextRun(announcement.getNextRun()
-                        + Math.round(Math.ceil(missedAnnouncements) * announcement.getInterval()));
-                dao.saveOrUpdateScheduledAnnouncement(announcement);
-            }
-
             announcements.add(announcement);
-        }
-
-        if (announcements.peek() != null) {
-            System.out.println("Next announcement scheduled for: " + new Date(announcements.peek().getNextRun()));
         }
     }
 

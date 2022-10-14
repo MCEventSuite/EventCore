@@ -2,11 +2,13 @@ package dev.imabad.mceventsuite.core.modules.announcements;
 
 import dev.imabad.mceventsuite.core.modules.announcements.db.ScheduledAnnouncement;
 
+import java.util.List;
 import java.util.PriorityQueue;
 
 public abstract class ScheduledAnnouncementsRunnable implements Runnable {
 
     private AnnouncementsModule module;
+    int currentAnnouncement;
 
     public ScheduledAnnouncementsRunnable(AnnouncementsModule module) {
         this.module = module;
@@ -16,19 +18,15 @@ public abstract class ScheduledAnnouncementsRunnable implements Runnable {
 
     @Override
     public void run() {
-        PriorityQueue<ScheduledAnnouncement> announcements = module.getAnnouncements();
-
+        List<ScheduledAnnouncement> announcements = module.getAnnouncements();
         if (announcements.size() == 0) return;
+        if(currentAnnouncement >= announcements.size())
+            currentAnnouncement = 0;
 
-        while (announcements.peek().getNextRun() <= System.currentTimeMillis()) {
-            ScheduledAnnouncement announcement = announcements.poll();
+        ScheduledAnnouncement announcement = announcements.get(currentAnnouncement);
+        this.broadcastMessage(announcement.getMessage());
+        currentAnnouncement++;
 
-            this.broadcastMessage(announcement.getMessage());
-
-            announcement.setNextRun(System.currentTimeMillis() + announcement.getInterval());
-            module.getDao().saveOrUpdateScheduledAnnouncement(announcement);
-            announcements.add(announcement);
-        }
     }
 
 }

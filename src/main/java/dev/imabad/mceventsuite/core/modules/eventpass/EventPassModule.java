@@ -3,6 +3,7 @@ package dev.imabad.mceventsuite.core.modules.eventpass;
 import dev.imabad.mceventsuite.core.EventCore;
 import dev.imabad.mceventsuite.core.api.modules.Module;
 import dev.imabad.mceventsuite.core.api.objects.EventPlayer;
+import dev.imabad.mceventsuite.core.api.objects.EventRank;
 import dev.imabad.mceventsuite.core.modules.announcements.db.ScheduledAnnouncementDAO;
 import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassDAO;
 import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassPlayer;
@@ -10,6 +11,7 @@ import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassReward;
 import dev.imabad.mceventsuite.core.modules.eventpass.db.EventPassUnlockedReward;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLDatabase;
 import dev.imabad.mceventsuite.core.modules.mysql.MySQLModule;
+import dev.imabad.mceventsuite.core.modules.mysql.dao.RankDAO;
 import dev.imabad.mceventsuite.core.modules.mysql.events.MySQLLoadedEvent;
 import dev.imabad.mceventsuite.core.modules.redis.RedisChannel;
 import dev.imabad.mceventsuite.core.modules.redis.RedisModule;
@@ -112,6 +114,22 @@ public class EventPassModule extends Module {
             List<EventPassReward> unlockedRewards = dao.getUnlockedRewards(player).stream().map(EventPassUnlockedReward::getUnlockedReward).collect(Collectors.toList());
             List<EventPassReward> rewards = getEventPassRewards().stream().filter(eventPassReward -> eventPassReward.getRequiredLevel() > 0 && eventPassReward.getRequiredLevel() <= newLevel && !unlockedRewards.contains(eventPassReward)).sorted(Comparator.comparingInt(EventPassReward::getRequiredLevel)).collect(Collectors.toList());
             for(EventPassReward reward : rewards) {
+                final int rank = reward.getEligible_rank();
+                if(rank != 0) {
+                    final Optional<EventRank> eventRankOptional = EventCore.getInstance().getModuleRegistry().getModule(MySQLModule.class).getMySQLDatabase()
+                            .getDAO(RankDAO.class).getRanks().stream().filter((r) -> r.getId() == rank).findFirst();
+                    if(!eventRankOptional.isPresent()) {
+                        throw new IllegalArgumentException("Reward " + reward.getId() + " has rank of " + reward.getEligible_rank() + " but rank does not exist!");
+                    }
+                    final EventRank eventRank = eventRankOptional.get();
+                    if(player.getRank().getPower() < eventRank.getPower()) {
+                        audience.sendMessage(Component.text("You could've unlocked " + reward.getName() + " " + reward.getDescription() + " " +
+                                "but you need " + eventRank.getName() + "! Consider purchasing from ").color(NamedTextColor.RED)
+                                .append(Component.text("store.cubedcon.com").color(NamedTextColor.GREEN)));
+                        rewards.remove(reward);
+                        continue;
+                    }
+                }
                 EventPassUnlockedReward unlockedReward = new EventPassUnlockedReward(reward, player);
                 dao.saveUnlockedReward(unlockedReward);
             }

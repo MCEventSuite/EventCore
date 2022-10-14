@@ -15,16 +15,18 @@ public class EventPassReward {
     private String description;
     private String image;
     private int requiredLevel;
+    private int eligible_rank;
     private int year;
 
     protected EventPassReward(){}
 
-    public EventPassReward(String name, String description, String image, int requiredLevel){
+    public EventPassReward(String name, String description, String image, int requiredLevel, int eligible_rank){
         this.id = UUID.randomUUID().toString();
         this.name = name;
         this.description = description;
         this.image = image;
         this.requiredLevel = requiredLevel;
+        this.eligible_rank = eligible_rank;
     }
 
     public void setId(String id) {
@@ -70,6 +72,14 @@ public class EventPassReward {
 
     public int getYear() {
         return year;
+    }
+
+    public int getEligible_rank() {
+        return eligible_rank;
+    }
+
+    public void setEligible_rank(int eligible_rank) {
+        this.eligible_rank = eligible_rank;
     }
 
     public void setYear(int year) {
