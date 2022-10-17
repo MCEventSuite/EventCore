@@ -20,13 +20,13 @@ public abstract class ScheduledAnnouncementsRunnable implements Runnable {
     public void run() {
         List<ScheduledAnnouncement> announcements = module.getAnnouncements();
         if (announcements.size() == 0) return;
-        if(currentAnnouncement >= announcements.size())
+        // Broadcast 1 announcement each call
+        if (currentAnnouncement >= announcements.size()) {
             currentAnnouncement = 0;
-
+        }
         ScheduledAnnouncement announcement = announcements.get(currentAnnouncement);
-        this.broadcastMessage(announcement.getMessage());
+        this.broadcastMessage("\n" + announcement.getMessage() + "\n");
         currentAnnouncement++;
-
     }
 
 }

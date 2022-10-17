@@ -38,7 +38,7 @@ public class AnnouncementsModule extends Module {
 
     @Override
     public List<Class<? extends Module>> getDependencies() {
-        return Arrays.asList(MySQLModule.class);
+        return List.of(MySQLModule.class);
     }
 
     public List<ScheduledAnnouncement> getAnnouncements() {
@@ -48,9 +48,7 @@ public class AnnouncementsModule extends Module {
     public void reloadAnnouncements() {
         announcements.clear();
 
-        for (ScheduledAnnouncement announcement : dao.getAllScheduledAnnouncements()) {
-            announcements.add(announcement);
-        }
+        announcements.addAll(dao.getAllScheduledAnnouncements());
     }
 
     protected ScheduledAnnouncementDAO getDao() {
